@@ -1,60 +1,55 @@
-"""Example package-owned data type.
+"""Package-owned data type for the LCMS package.
 
-Mirrors the spectroscopy ``Spectrum`` pattern: subclass a core ``DataObject``
-type and pin the semantic names through ``__init__`` defaults. Replace this
-with your own type — or return an empty list from :func:`get_types` if your
-package adds no new types (blocks can operate on core types directly).
+A single domain type, :class:`LCMSFeatures`, modelled directly on what an
+LC-MS peak picker (El-MAVEN, MZmine, ...) exports: a wide feature/peak table.
+It subclasses the core ``DataFrame`` rather than imposing a fixed column
+schema, because "whatever the peak picker exports" *is* the table.
 """
 
 from __future__ import annotations
 
-from typing import Any
-
 from pydantic import BaseModel, ConfigDict
-from scistudio.core.types.series import Series
-
-#: Canonical semantic names for an :class:`ExampleSeries`.
-INDEX_NAME = "x"
-VALUE_NAME = "value"
+from scistudio.core.types.dataframe import DataFrame
 
 
-class ExampleSeries(Series):
-    """A minimal 1-D series type owned by this package.
+class LCMSFeatures(DataFrame):
+    """An LC-MS feature / peak table as exported by a peak-picking tool.
 
-    Subclasses core :class:`~scistudio.core.types.series.Series`. The semantic
-    names are pinned via ``__init__`` defaults; replace them with names that
-    fit your domain.
+    Subclasses core :class:`~scistudio.core.types.dataframe.DataFrame` and holds
+    the exported table verbatim: one row per detected feature (or per
+    isotopologue, for an isotope-tracing experiment) and one column per sample,
+    alongside the peak picker's identifying columns (``compound``, ``formula``,
+    m/z, retention time, isotope label, ...).
+
+    The package deliberately does **not** pin a fixed column schema: the columns
+    are exactly those the upstream tool produced. The only domain addition over
+    a bare ``DataFrame`` is the typed :class:`Meta` carrying table-level
+    provenance that downstream blocks (e.g. isotope correction) rely on.
     """
 
-    def __init__(
-        self,
-        *,
-        index_name: str | None = INDEX_NAME,
-        value_name: str | None = VALUE_NAME,
-        length: int | None = None,
-        data: Any = None,
-        **kwargs: Any,
-    ) -> None:
-        super().__init__(
-            index_name=index_name,
-            value_name=value_name,
-            length=length,
-            data=data,
-            **kwargs,
-        )
-
     class Meta(BaseModel):
-        """Per-object typed metadata. Frozen for immutable ``with_meta`` updates."""
+        """Table-level provenance metadata.
+
+        Frozen so :meth:`DataFrame.with_meta` immutable updates stay sound.
+        Every field is nullable: it records what is known, ``None`` when not.
+        """
 
         model_config = ConfigDict(frozen=True)
 
-        unit: str | None = None
+        #: Acquisition polarity for the whole table: ``"positive"`` /
+        #: ``"negative"`` (carried down so isotope correction can infer charge).
+        polarity: str | None = None
+        #: Peak-picking tool the table came from, e.g. ``"elmaven"``.
+        source_tool: str | None = None
+        #: Original file the table was loaded from.
         source_file: str | None = None
+        #: Whether the table carries isotopologue rows (isotope-tracing run).
+        labeled: bool | None = None
 
 
 def get_types() -> list[type]:
     """Return the package's exported ``DataObject`` types for ``scistudio.types``."""
-    return [ExampleSeries]
+    return [LCMSFeatures]
 
 
-__all__ = ["INDEX_NAME", "VALUE_NAME", "ExampleSeries", "get_types"]
+__all__ = ["LCMSFeatures", "get_types"]

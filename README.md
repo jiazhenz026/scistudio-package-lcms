@@ -1,64 +1,84 @@
 # scistudio-package-lcms
 
-A GitHub **template repository** for building a new
-[SciStudio](https://github.com/jiazhenz026/SciStudio) package. It ships a
-minimal but complete example package plus the governance every package
-should have: CI (lint, type, test, wheel build, contract check), an
-`AGENTS.md` + PR checklist, and a documentation standard.
+LC-MS metabolomics and isotope-tracing blocks for
+[SciStudio](https://github.com/jiazhenz026/SciStudio). This package covers the
+**upstream** of an LC-MS workflow: get a peak table into SciStudio, define and
+subtract background, and run natural-abundance isotope correction.
 
-The conventions follow `scistudio-blocks-spectroscopy`, the reference package.
+Conventions follow `scistudio-blocks-spectroscopy`, the reference package.
 
-## Use this template
+## Scope / non-goals
 
-1. On GitHub, click **Use this template → Create a new repository**. Name it
-   `scistudio-blocks-<domain>`.
-2. Add the repository secret **`SCISTUDIO_CORE_TOKEN`** (Settings → Secrets and
-   variables → Actions). It needs read access to the private `scistudio` core
-   repo so CI can install it. Until core is on PyPI, every block repo needs
-   this secret.
-3. Rename the package to your domain:
-   - `src/scistudio_package_lcms/` → `src/scistudio_blocks_<domain>/`
-   - In `pyproject.toml`: `[project].name`, the three `[project.entry-points...]`
-     references, `[tool.hatch.build.targets.wheel].packages`, and
-     `known-first-party`.
-   - Update `__init__.py` imports and `PackageInfo`.
-4. Replace the example type/block/previewer with your own.
-5. Fill in `README.md`, `docs/package-overview.md`, and `CHANGELOG.md` to
-   `docs/DOCUMENTATION-STANDARD.md`.
+- **In scope (this release):** ingesting a peak-picker export, El-MAVEN
+  integration, background selection + subtraction, and natural-abundance
+  isotope correction (AccuCor / AccuCor2).
+- **Out of scope:** raw-data processing (peak picking itself is done in the
+  external tool), and all downstream analysis (normalization, drift correction,
+  statistics, quantification, pathway enrichment) — those come later.
+- Must not import sibling block packages (imaging, spectroscopy, srs); it
+  depends only on `scistudio` core.
 
-## What's inside
+## Data types
 
-```
-.
-├── AGENTS.md                       # contributor + AI-agent rules (lightweight)
-├── CONTRIBUTING.md                 # dev setup, local checks, release
-├── LICENSE                         # MIT
-├── pyproject.toml                  # hatchling + ruff/mypy/pytest + entry points
-├── .github/
-│   ├── workflows/ci.yml            # lint · type · test · contract · wheel
-│   └── pull_request_template.md    # the gate is this checklist
-├── docs/
-│   ├── DOCUMENTATION-STANDARD.md   # what every package's docs must contain
-│   └── package-overview.md         # fill-in catalog template
-├── scripts/validate_contract.py    # entry-point + registry contract check
-├── src/scistudio_package_lcms/   # minimal example: 1 type, 1 block, previewers stub
-└── tests/                          # packaging · contract · block tests
-```
+| Type | Core base | Represents | Key metadata |
+| --- | --- | --- | --- |
+| `LCMSFeatures` | `DataFrame` | A peak/feature table exactly as a peak picker exported it (one row per feature or isotopologue, one column per sample) | `polarity`, `source_tool`, `source_file`, `labeled` |
 
-## Governance in one breath
+`LCMSFeatures` keeps the exported columns verbatim — it does not impose a fixed
+schema — so the same type serves both untargeted and isotope-tracing tables.
 
-- No gate ledger, no multi-step workflow. The gate is the PR checklist
-  (`.github/pull_request_template.md`) enforced by CI.
-- Every PR closes an issue, adds/updates tests for behavior changes, and keeps
-  docs to the standard.
-- `python scripts/validate_contract.py` + `scistudio blocks` prove the package
-  still installs into core. CI runs both.
+## Blocks
 
-## Develop the example locally
+| Group | Block | Inputs → Outputs |
+| --- | --- | --- |
+| io | `LoadPeakTable` | file path → `LCMSFeatures` |
+| interactive | `ElMaven` | `mzml: Artifact` → `peaks: LCMSFeatures` |
+| preprocessing | `BackgroundSelector` | `features` → `samples` + `background` (1:1) |
+| preprocessing | `BackgroundSubtraction` | `samples` + `background` → `result` |
+| preprocessing | `IsotopeCorrection` | `features` → `corrected` + `mid` + `pool_size` |
+
+A typical upstream graph: `ElMaven` (or `LoadPeakTable`) →
+`BackgroundSelector` → `BackgroundSubtraction` → `IsotopeCorrection`.
+
+## IO / format support
+
+`LoadPeakTable` reads El-MAVEN / generic CSV-or-TSV exports verbatim (no
+`FormatCapability` registration yet — it is a direct loader). `ElMaven` opens
+mzML inputs in the external El-MAVEN app and parses the export back into
+`LCMSFeatures`.
+
+## Previewers
+
+No previewers in this release.
+
+## External requirements
+
+- **`IsotopeCorrection`** wraps the published R packages and therefore needs
+  **R** with `accucor` and `accucor2` installed. SciStudio core has no
+  system-dependency mechanism, so this is checked at runtime and reported with a
+  clear error when missing. Install once:
+
+  ```r
+  install.packages("devtools")
+  devtools::install_github("XiaoyangSu/AccuCor")
+  devtools::install_github("wangyujue23/AccuCor2")
+  ```
+
+- **`ElMaven`** needs the El-MAVEN desktop application installed; set its path
+  via the block's `app_command` config when it is not on `PATH`.
+
+## Install
 
 ```bash
+# Core (private; installed from the repo until it is on PyPI)
 pip install "scistudio @ git+https://github.com/jiazhenz026/SciStudio.git@main"
+# This package, with dev tools
 pip install -e ".[dev]"
-pytest
-scistudio blocks   # the example block should appear
+scistudio blocks    # the LCMS blocks should appear
 ```
+
+Compatibility floor: `scistudio>=0.2.1a0`, Python `>=3.11`.
+
+## License
+
+MIT.

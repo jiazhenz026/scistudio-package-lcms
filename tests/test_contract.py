@@ -6,7 +6,7 @@ from scistudio.blocks.base.block import Block
 from scistudio.blocks.base.package_info import PackageInfo
 
 import scistudio_package_lcms as pkg
-from scistudio_package_lcms.types import ExampleSeries
+from scistudio_package_lcms.types import LCMSFeatures
 
 
 def test_get_block_package_shape() -> None:
@@ -18,7 +18,7 @@ def test_get_block_package_shape() -> None:
 
 def test_get_types_returns_classes() -> None:
     types = pkg.get_types()
-    assert ExampleSeries in types
+    assert LCMSFeatures in types
     assert all(isinstance(t, type) for t in types)
 
 

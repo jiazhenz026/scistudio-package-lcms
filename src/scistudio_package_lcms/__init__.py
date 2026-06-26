@@ -1,14 +1,7 @@
-"""Example SciStudio package — the reference layout for a plugin package.
+"""SciStudio LCMS package — LC-MS metabolomics & isotope-tracing blocks.
 
-Copy this template ("Use this template" on GitHub), then:
-
-  1. Rename ``src/scistudio_package_lcms`` to your module name.
-  2. Update the distribution name and the three entry points in
-     ``pyproject.toml``.
-  3. Replace the example type/block/previewer with your own.
-
-Three entry points register the package with SciStudio core (mirroring
-``scistudio-blocks-spectroscopy``):
+Extends the SciStudio core runtime through three entry points discovered at
+startup:
 
 - ``scistudio.blocks``     -> :func:`get_block_package`
 - ``scistudio.types``      -> :func:`get_types`
@@ -21,7 +14,7 @@ from scistudio.blocks.base.package_info import PackageInfo
 
 from scistudio_package_lcms.blocks import BLOCKS
 from scistudio_package_lcms.previewers import get_previewers
-from scistudio_package_lcms.types import ExampleSeries, get_types
+from scistudio_package_lcms.types import LCMSFeatures, get_types
 
 __version__ = "0.1.0"
 
@@ -30,7 +23,7 @@ def get_package_info() -> PackageInfo:
     """Return package metadata for the ``scistudio.blocks`` registry."""
     return PackageInfo(
         name="scistudio-package-lcms",
-        description="SciStudio LCMS package.",
+        description="LC-MS metabolomics and isotope-tracing blocks for SciStudio.",
         author="SciStudio Contributors",
         version=__version__,
     )
@@ -47,7 +40,7 @@ def get_block_package() -> tuple[PackageInfo, list[type]]:
 
 
 __all__ = [
-    "ExampleSeries",
+    "LCMSFeatures",
     "__version__",
     "get_block_package",
     "get_blocks",
