@@ -1,38 +1,64 @@
-# scistudio-blocks-lcms
+# scistudio-package-lcms
 
-Phase 11 LC-MS (Liquid Chromatography - Mass Spectrometry) plugin for
-SciStudio. Placeholder skeleton; implementation in progress per
-`docs/specs/phase11-implementation-standards.md` section 9.4.
+A GitHub **template repository** for building a new
+[SciStudio](https://github.com/jiazhenz026/SciStudio) package. It ships a
+minimal but complete example package plus the governance every package
+should have: CI (lint, type, test, wheel build, contract check), an
+`AGENTS.md` + PR checklist, and a documentation standard.
 
-## ADR-043 IO format capabilities
+The conventions follow `scistudio-blocks-spectroscopy`, the reference package.
 
-The LC-MS IO pilot declares explicit `FormatCapability` records for low-risk
-published IOBlocks. These IDs are stable workflow replay keys:
+## Use this template
 
-| Capability ID | Direction | Format | Extensions | Fidelity |
-|---|---|---|---|---|
-| `scistudio-blocks-lcms.ms_raw.mzml.load` | load | `mzml` | `.mzml` | `typed_meta`: `format`, `polarity`, `instrument`, `acquisition_date`, `sample_id` |
-| `scistudio-blocks-lcms.ms_raw.mzxml.load` | load | `mzxml` | `.mzxml` | `typed_meta`: `format`, `polarity`, `instrument`, `acquisition_date`, `sample_id` |
-| `scistudio-blocks-lcms.ms_raw.raw.load` | load | `raw` | `.raw` | `typed_meta`: `format`, `sample_id` |
-| `scistudio-blocks-lcms.ms_raw.d.load` | load | `d` | `.d` | `typed_meta`: `format`, `sample_id` |
-| `scistudio-blocks-lcms.peak_table.csv.load` | load | `csv` | `.csv` | `typed_meta`: `source`, `polarity` |
-| `scistudio-blocks-lcms.peak_table.tsv.load` | load | `tsv` | `.tsv` | `typed_meta`: `source`, `polarity` |
-| `scistudio-blocks-lcms.peak_table.xlsx.load` | load | `xlsx` | `.xlsx`, `.xls` | `typed_meta`: `source`, `polarity` |
-| `scistudio-blocks-lcms.mid_table.csv.load` | load | `csv` | `.csv` | `typed_meta`: `tracer_atoms`, `sample_columns`, `corrected`, `correction_tool` |
-| `scistudio-blocks-lcms.mid_table.tsv.load` | load | `tsv` | `.tsv` | `typed_meta`: `tracer_atoms`, `sample_columns`, `corrected`, `correction_tool` |
-| `scistudio-blocks-lcms.mid_table.xlsx.load` | load | `xlsx` | `.xlsx`, `.xls` | `typed_meta`: `tracer_atoms`, `sample_columns`, `corrected`, `correction_tool` |
-| `scistudio-blocks-lcms.sample_metadata.csv.load` | load | `csv` | `.csv` | `typed_meta`: `sample_id_column` |
-| `scistudio-blocks-lcms.sample_metadata.tsv.load` | load | `tsv` | `.tsv` | `typed_meta`: `sample_id_column` |
-| `scistudio-blocks-lcms.sample_metadata.xlsx.load` | load | `xlsx` | `.xlsx`, `.xls` | `typed_meta`: `sample_id_column` |
-| `scistudio-blocks-lcms.table.csv.save` | save | `csv` | `.csv` | `pixel_only` |
-| `scistudio-blocks-lcms.table.tsv.save` | save | `tsv` | `.tsv` | `pixel_only` |
-| `scistudio-blocks-lcms.table.xlsx.save` | save | `xlsx` | `.xlsx` | `pixel_only` |
+1. On GitHub, click **Use this template → Create a new repository**. Name it
+   `scistudio-blocks-<domain>`.
+2. Add the repository secret **`SCISTUDIO_CORE_TOKEN`** (Settings → Secrets and
+   variables → Actions). It needs read access to the private `scistudio` core
+   repo so CI can install it. Until core is on PyPI, every block repo needs
+   this secret.
+3. Rename the package to your domain:
+   - `src/scistudio_package_lcms/` → `src/scistudio_blocks_<domain>/`
+   - In `pyproject.toml`: `[project].name`, the three `[project.entry-points...]`
+     references, `[tool.hatch.build.targets.wheel].packages`, and
+     `known-first-party`.
+   - Update `__init__.py` imports and `PackageInfo`.
+4. Replace the example type/block/previewer with your own.
+5. Fill in `README.md`, `docs/package-overview.md`, and `CHANGELOG.md` to
+   `docs/DOCUMENTATION-STANDARD.md`.
 
-Raw acquisition formats are declared as one-way load capabilities. They do not
-declare `roundtrip_group` because SciStudio records paths and lightweight typed
-metadata while external LC-MS tools own scan-level parsing and vendor export.
+## What's inside
 
-<!-- TODO(#1204): Complete published-package hard-validation migration beyond this ADR-043 pilot.
-  Out of scope per ADR-043 §9 and issue #1213 pilot scope.
-  Followup: https://github.com/zjzcpj/SciStudio/issues/1204.
--->
+```
+.
+├── AGENTS.md                       # contributor + AI-agent rules (lightweight)
+├── CONTRIBUTING.md                 # dev setup, local checks, release
+├── LICENSE                         # MIT
+├── pyproject.toml                  # hatchling + ruff/mypy/pytest + entry points
+├── .github/
+│   ├── workflows/ci.yml            # lint · type · test · contract · wheel
+│   └── pull_request_template.md    # the gate is this checklist
+├── docs/
+│   ├── DOCUMENTATION-STANDARD.md   # what every package's docs must contain
+│   └── package-overview.md         # fill-in catalog template
+├── scripts/validate_contract.py    # entry-point + registry contract check
+├── src/scistudio_package_lcms/   # minimal example: 1 type, 1 block, previewers stub
+└── tests/                          # packaging · contract · block tests
+```
+
+## Governance in one breath
+
+- No gate ledger, no multi-step workflow. The gate is the PR checklist
+  (`.github/pull_request_template.md`) enforced by CI.
+- Every PR closes an issue, adds/updates tests for behavior changes, and keeps
+  docs to the standard.
+- `python scripts/validate_contract.py` + `scistudio blocks` prove the package
+  still installs into core. CI runs both.
+
+## Develop the example locally
+
+```bash
+pip install "scistudio @ git+https://github.com/jiazhenz026/SciStudio.git@main"
+pip install -e ".[dev]"
+pytest
+scistudio blocks   # the example block should appear
+```
