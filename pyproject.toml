@@ -14,7 +14,7 @@ dependencies = [
     # Core. Private and not on PyPI yet, so CI installs it from the private
     # repo (see .github/workflows/ci.yml). The version floor still documents
     # the minimum core contract this package targets.
-    "scistudio>=0.2.1a0",
+    "scistudio>=0.3.0a0",
     "numpy>=1.24",
 ]
 
