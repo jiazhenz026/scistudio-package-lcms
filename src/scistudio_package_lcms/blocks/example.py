@@ -15,10 +15,12 @@ from typing import Any, ClassVar
 from scistudio.blocks.base.config import BlockConfig
 from scistudio.blocks.base.ports import InputPort, OutputPort
 from scistudio.blocks.process.process_block import ProcessBlock
+from scistudio.stability import stable
 
 from scistudio_package_lcms.types import ExampleSeries
 
 
+@stable(since="0.1.0")
 class ExampleBlock(ProcessBlock):
     """Pass each input series through unchanged.
 

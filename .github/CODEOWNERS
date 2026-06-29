@@ -1,0 +1,16 @@
+# Code owners — the public API contract surface (ADR-052 §15).
+#
+# The surface snapshot and the freeze test ARE the contract. Changing them must
+# be owner-reviewed so the public API cannot drift silently: an accidental edit
+# is caught by CI (the freeze test), and an intentional change is a reviewable
+# diff that needs sign-off here.
+#
+# Enable branch protection on `main` with "Require review from Code Owners" for
+# this to be enforced (Settings → Branches → branch protection rule).
+
+# The frozen surface + its freeze test.
+/tests/api/                 @jiazhenz026
+
+# The tools that compute and enforce the surface contract.
+/scripts/snapshot_api.py    @jiazhenz026
+/scripts/validate_contract.py @jiazhenz026

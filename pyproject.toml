@@ -12,9 +12,11 @@ requires-python = ">=3.11"
 authors = [{ name = "SciStudio Contributors" }]
 dependencies = [
     # Core. Private and not on PyPI yet, so CI installs it from the private
-    # repo (see .github/workflows/ci.yml). The version floor still documents
-    # the minimum core contract this package targets.
-    "scistudio>=0.3.0a0",
+    # repo (see .github/workflows/ci.yml). The version floor documents the
+    # minimum core contract this package targets: the 0.3.1 line, which ships
+    # `scistudio.stability` (ADR-052 §5) — the decorators every public symbol
+    # carries. `>=0.3.1a0` keeps the alpha line installable.
+    "scistudio>=0.3.1a0",
     "numpy>=1.24",
 ]
 
@@ -25,6 +27,12 @@ dev = [
     "ruff>=0.11",
     "mypy>=1.10",
     "build>=1.2",
+]
+# Generated API reference (ADR-052 §7): mkdocstrings + griffe render the public
+# surface from docstrings and the `scistudio.stability` decorators.
+docs = [
+    "mkdocs>=1.6",
+    "mkdocstrings[python]>=0.26",
 ]
 
 # Three entry points register the package with SciStudio core. Keep all three
@@ -37,6 +45,17 @@ example = "scistudio_package_lcms:get_types"
 
 [project.entry-points."scistudio.previewers"]
 example = "scistudio_package_lcms.previewers:get_previewers"
+
+# OTA hot-update source (#1784). The publish-time source of truth for
+# scripts/ota_publish.py: it packs src/, hashes it, and uploads manifest.json +
+# the snapshot to `manifest_url`'s release. The same URL/channel are mirrored in
+# the package's PackageInfo.ota (src/.../__init__.py); validate_contract.py
+# enforces they match. `min_core_base` is the minimum core `a.b.c` base a client
+# must run to apply this package — usually the `scistudio>=` floor above.
+[tool.scistudio.ota]
+manifest_url = "https://github.com/jiazhenz026/scistudio-package-lcms/releases/download/ota-alpha/manifest.json"
+channel = "alpha"
+min_core_base = "0.3.1"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/scistudio_package_lcms"]
