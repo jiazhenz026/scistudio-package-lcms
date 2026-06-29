@@ -6,7 +6,7 @@ stability marker against the package's own version line, and the example type
 satisfies the §13.1 member set. They run the *same* ``_validate_reuse_surface``
 the contract script and CI use, so the test and the gate cannot disagree.
 
-When you implement a skeleton (``ExampleSeries.from_arrays`` /
+When you implement a skeleton (``LCMSFeatureTable.from_elmaven`` /
 ``describe_public_api``), replace the matching ``raises(NotImplementedError)``
 test with one that asserts your real behavior.
 """
@@ -18,13 +18,28 @@ import inspect
 from pathlib import Path
 from types import ModuleType
 
+import pandas as pd
 import pytest
-from scistudio.core.types.base import DataObject
+from scistudio.core.types import DataObject
 from scistudio.stability import get_stability
 
 import scistudio_package_lcms as pkg
 from scistudio_package_lcms.blocks import ExampleBlock
-from scistudio_package_lcms.types import ExampleSeries
+from scistudio_package_lcms.types import LCMSFeatureTable
+
+
+def _elmaven_frame() -> pd.DataFrame:
+    """A minimal El-MAVEN peaks frame: two annotation columns + two samples."""
+    return pd.DataFrame(
+        {
+            "isotopeLabel": ["C12 PARENT", "C13-label-1"],
+            "medMz": [180.066, 181.070],
+            "medRt": [10.07, 10.06],
+            "compound": ["L-Tyrosine", "L-Tyrosine"],
+            "Sample_A": [1608868.0, 161615.45],
+            "Sample_B": [1743866.38, 163117.81],
+        }
+    )
 
 
 def _load_validator() -> ModuleType:
@@ -44,10 +59,26 @@ def test_reuse_surface_validator_passes() -> None:
     validator._validate_reuse_surface("scistudio_package_lcms", pkg.get_types())
 
 
-def test_from_arrays_is_unimplemented_skeleton() -> None:
-    """The MUST-shape domain constructor raises until the author fills it in."""
-    with pytest.raises(NotImplementedError):
-        ExampleSeries.from_arrays([0, 1, 2], [10.0, 20.0, 30.0])
+def test_from_elmaven_packs_a_feature_table() -> None:
+    """The MUST-shape domain constructor packs an El-MAVEN frame into the type."""
+    table = LCMSFeatureTable.from_elmaven(_elmaven_frame(), polarity="negative")
+
+    assert isinstance(table, LCMSFeatureTable)
+    assert table.row_count == 2
+    assert table.columns is not None and "Sample_A" in table.columns
+    # The annotation/sample split, polarity, software, and label flag travel on Meta.
+    meta = table.meta
+    assert meta.sample_columns == ("Sample_A", "Sample_B")
+    assert meta.annotation_columns == ("medMz", "medRt", "isotopeLabel", "compound")
+    assert meta.polarity == "negative"
+    assert meta.software == "El-MAVEN"
+    assert meta.labeled is True
+
+
+def test_from_elmaven_rejects_a_non_peaks_frame() -> None:
+    """A frame with no El-MAVEN annotation columns is not a peaks export."""
+    with pytest.raises(ValueError, match="annotation columns"):
+        LCMSFeatureTable.from_elmaven(pd.DataFrame({"a": [1], "b": [2]}))
 
 
 def test_describe_public_api_is_unimplemented_skeleton() -> None:
@@ -56,27 +87,28 @@ def test_describe_public_api_is_unimplemented_skeleton() -> None:
         pkg.describe_public_api()
 
 
-def test_example_series_contract_members() -> None:
-    """``ExampleSeries`` satisfies the §13.1 member set."""
+def test_feature_table_contract_members() -> None:
+    """``LCMSFeatureTable`` satisfies the §13.1 member set."""
     # Public at the package top level — never a deep import path.
-    assert pkg.ExampleSeries is ExampleSeries
+    assert pkg.LCMSFeatureTable is LCMSFeatureTable
     # Subclasses a core DataObject.
-    assert issubclass(ExampleSeries, DataObject)
+    assert issubclass(LCMSFeatureTable, DataObject)
     # Typed metadata schema lives on the type.
-    assert isinstance(ExampleSeries.Meta, type)
+    assert isinstance(LCMSFeatureTable.Meta, type)
     # The domain constructor is a classmethod ON the type, not a free function.
-    assert isinstance(inspect.getattr_static(ExampleSeries, "from_arrays"), classmethod)
+    assert isinstance(inspect.getattr_static(LCMSFeatureTable, "from_elmaven"), classmethod)
     # Never shadows the inherited ergonomic accessors (spec §10).
-    assert "to_pandas" not in vars(ExampleSeries)
-    assert "to_numpy" not in vars(ExampleSeries)
+    assert "to_pandas" not in vars(LCMSFeatureTable)
+    assert "to_numpy" not in vars(LCMSFeatureTable)
 
 
 def test_public_api_carries_stability_markers() -> None:
     """Every public symbol carries an ADR-052 §5 tier + ``Since`` on the package line."""
     stable_symbols = (
-        pkg.ExampleSeries,
-        ExampleSeries.Meta,
-        ExampleSeries.from_arrays,
+        pkg.LCMSFeatureTable,
+        LCMSFeatureTable.Meta,
+        LCMSFeatureTable.from_elmaven,
+        LCMSFeatureTable.from_wide,
         ExampleBlock,
         pkg.get_types,
         pkg.get_block_package,

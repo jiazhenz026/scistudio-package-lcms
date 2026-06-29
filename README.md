@@ -23,9 +23,10 @@ The conventions follow `scistudio-blocks-spectroscopy`, the reference package.
      `known-first-party`.
    - Update `__init__.py` imports and `PackageInfo`.
 4. Replace the example type/block/previewer with your own, and **fill in the
-   MUST skeletons**: `ExampleSeries.from_arrays(...)` and `describe_public_api()`
-   raise `NotImplementedError` until you implement them (ADR-052 §13.3), so a
-   half-finished package fails loudly instead of shipping a partial contract.
+   MUST skeletons**: the type's `from_<domain>(...)` constructor and
+   `describe_public_api()` raise `NotImplementedError` until you implement them
+   (ADR-052 §13.3), so a half-finished package fails loudly instead of shipping
+   a partial contract.
 5. Fill in `README.md`, `docs/package-overview.md`, and `CHANGELOG.md` to
    `docs/DOCUMENTATION-STANDARD.md`.
 
@@ -71,9 +72,10 @@ constructors, and the inherited accessors someone imports to write their own
 block, plot, or script. This template makes the reuse surface
 **self-enforcing**, so a scaffolded package is correct-by-construction:
 
-- **MUST members ship as skeletons that raise.** `ExampleSeries.from_arrays(...)`
-  (the domain-native constructor, on the type) and `describe_public_api()` (the
-  discovery hook) raise `NotImplementedError` until you implement them.
+- **MUST members ship as skeletons that raise until implemented.** A type's
+  domain-native constructor (here `LCMSFeatureTable.from_elmaven(...)`, now
+  implemented) and `describe_public_api()` (the discovery hook, still a
+  skeleton) raise `NotImplementedError` until filled in.
 - **SHOULD members ship as empty placeholders.** `helpers.py` is the home for
   optional public cross-type helpers — fill it in or leave it empty.
 - **Every public symbol carries a stability marker.** `@stable` / `@provisional`

@@ -5,11 +5,10 @@ from __future__ import annotations
 import tomllib
 from pathlib import Path
 
-from scistudio.blocks.base.block import Block
-from scistudio.blocks.base.package_info import PackageInfo
+from scistudio.blocks.base import Block, PackageInfo
 
 import scistudio_package_lcms as pkg
-from scistudio_package_lcms.types import ExampleSeries
+from scistudio_package_lcms.types import LCMSFeatureTable
 
 
 def test_get_block_package_shape() -> None:
@@ -33,7 +32,7 @@ def test_package_info_declares_ota_matching_pyproject() -> None:
 
 def test_get_types_returns_classes() -> None:
     types = pkg.get_types()
-    assert ExampleSeries in types
+    assert LCMSFeatureTable in types
     assert all(isinstance(t, type) for t in types)
 
 

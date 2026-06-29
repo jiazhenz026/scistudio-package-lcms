@@ -4,7 +4,43 @@
     {
       "kind": "class",
       "since": "0.1.0",
+      "symbol": "scistudio_package_lcms.blocks.background_subtraction:BackgroundSubtraction",
+      "tier": "stable"
+    },
+    {
+      "kind": "data",
+      "since": "0.3.1",
+      "symbol": "scistudio_package_lcms.blocks.background_subtraction:execution_mode",
+      "tier": "stable"
+    },
+    {
+      "kind": "data",
+      "since": "0.3.1",
+      "symbol": "scistudio_package_lcms.blocks.background_subtraction:interactive_panel",
+      "tier": "provisional"
+    },
+    {
+      "kind": "class",
+      "since": "0.1.0",
+      "symbol": "scistudio_package_lcms.blocks.elmaven:ElMaven",
+      "tier": "stable"
+    },
+    {
+      "kind": "class",
+      "since": "0.1.0",
       "symbol": "scistudio_package_lcms.blocks.example:ExampleBlock",
+      "tier": "stable"
+    },
+    {
+      "kind": "class",
+      "since": "0.1.0",
+      "symbol": "scistudio_package_lcms.blocks.isotope_correction:IsotopeCorrection",
+      "tier": "stable"
+    },
+    {
+      "kind": "class",
+      "since": "0.1.0",
+      "symbol": "scistudio_package_lcms.blocks.load_peak_table:LoadPeakTable",
       "tier": "stable"
     },
     {
@@ -14,40 +50,52 @@
       "tier": null
     },
     {
+      "kind": "data",
+      "since": "0.3.1",
+      "symbol": "scistudio_package_lcms.blocks:execution_mode",
+      "tier": "stable"
+    },
+    {
+      "kind": "data",
+      "since": "0.3.1",
+      "symbol": "scistudio_package_lcms.blocks:interactive_panel",
+      "tier": "provisional"
+    },
+    {
       "kind": "function",
       "since": "0.1.0",
       "symbol": "scistudio_package_lcms.previewers:get_previewers",
       "tier": "stable"
     },
     {
+      "kind": "data",
+      "since": null,
+      "symbol": "scistudio_package_lcms.types:ELMAVEN_ANNOTATION_COLUMNS",
+      "tier": null
+    },
+    {
       "kind": "class",
       "since": "0.1.0",
-      "symbol": "scistudio_package_lcms.types:ExampleSeries",
+      "symbol": "scistudio_package_lcms.types:LCMSFeatureTable",
       "tier": "stable"
     },
     {
       "kind": "class",
       "since": "0.1.0",
-      "symbol": "scistudio_package_lcms.types:ExampleSeries.Meta",
+      "symbol": "scistudio_package_lcms.types:LCMSFeatureTable.Meta",
       "tier": "stable"
     },
     {
       "kind": "classmethod",
       "since": "0.1.0",
-      "symbol": "scistudio_package_lcms.types:ExampleSeries.from_arrays",
+      "symbol": "scistudio_package_lcms.types:LCMSFeatureTable.from_elmaven",
       "tier": "stable"
     },
     {
-      "kind": "data",
-      "since": null,
-      "symbol": "scistudio_package_lcms.types:INDEX_NAME",
-      "tier": null
-    },
-    {
-      "kind": "data",
-      "since": null,
-      "symbol": "scistudio_package_lcms.types:VALUE_NAME",
-      "tier": null
+      "kind": "classmethod",
+      "since": "0.1.0",
+      "symbol": "scistudio_package_lcms.types:LCMSFeatureTable.from_wide",
+      "tier": "stable"
     },
     {
       "kind": "function",

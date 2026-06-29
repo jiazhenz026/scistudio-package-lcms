@@ -1,23 +1,29 @@
-# Package Overview — <package name>
+# Package Overview — scistudio-package-lcms
 
-> Fill this in for your package. This is the structured catalog required by
-> `docs/DOCUMENTATION-STANDARD.md`. Keep it in sync with the code: the blocks
-> listed here must match `get_blocks()` and the `README.md` block table.
+> The structured catalog required by `docs/DOCUMENTATION-STANDARD.md`. Keep it
+> in sync with the code: the blocks listed here must match `get_blocks()` and
+> the `README.md` block table.
 
 ## Purpose
 
-<One paragraph: what scientific domain / task this package serves.>
+LCMS analysis blocks and types for SciStudio: working with feature tables from
+untargeted and isotope-tracing liquid chromatography–mass spectrometry runs
+(El-MAVEN peaks exports), through background handling, isotope correction, and
+relative-flux calculation.
 
 ## Scope and non-goals
 
-- In scope: <...>
-- Out of scope: <...> (and any sibling package this must not import)
+- In scope: LCMS feature tables (wide: feature annotation + per-sample
+  intensity) and the blocks that load, clean, and quantify them.
+- Out of scope: raw spectra / chromatogram processing and peak *picking* (that
+  is the upstream tool's job, e.g. El-MAVEN); no import of sibling domain
+  packages.
 
 ## Data types
 
 | Type | Core base | Represents | Key metadata |
 | --- | --- | --- | --- |
-| `ExampleSeries` | `Series` | A 1-D series of values | `unit`, `source_file` |
+| `LCMSFeatureTable` | `DataFrame` | A wide feature table: annotation columns + one intensity column per sample | `polarity`, `software`, `labeled`, `annotation_columns`, `sample_columns` |
 
 ## Developer-facing API (ADR-052 §13.1)
 
@@ -29,11 +35,13 @@ package's** version line. Transcribe this table for your own types (ADR-052
 
 | Member | Kind | Tier | Since | Notes |
 | --- | --- | --- | --- | --- |
-| `ExampleSeries` | type (subclasses `Series`) | stable | 0.1.0 | public at `from scistudio_package_lcms import ExampleSeries` — never a deep path |
-| `ExampleSeries(data=…, meta=…)` | constructor | stable | 0.1.0 | canonical construction; inherited core idiom, signature not redefined |
-| `ExampleSeries.Meta` | pydantic model | stable | 0.1.0 | typed, frozen metadata schema |
-| `ExampleSeries.from_arrays(index, values, *, meta=None)` | classmethod | stable | 0.1.0 | domain-native packing constructor **on the type** (skeleton — implement) |
-| `ExampleSeries.to_memory` / `to_pandas` / `to_numpy` / `sel` / `with_meta` | method | stable | core | inherited from core; **never** shadowed |
+| `LCMSFeatureTable` | type (subclasses `DataFrame`) | stable | 0.1.0 | public at `from scistudio_package_lcms import LCMSFeatureTable` — never a deep path |
+| `LCMSFeatureTable(columns=…, row_count=…, schema=…, data=…, meta=…)` | constructor | stable | 0.1.0 | canonical construction; inherited core `DataFrame` idiom, signature not redefined |
+| `LCMSFeatureTable.Meta` | pydantic model | stable | 0.1.0 | typed, frozen metadata: `polarity`, `software`, `labeled`, `annotation_columns`, `sample_columns` |
+| `LCMSFeatureTable.from_elmaven(frame, *, polarity=None, sample_columns=None)` | classmethod | stable | 0.1.0 | domain-native packing constructor **on the type**: packs an El-MAVEN peaks frame |
+| `LCMSFeatureTable.from_wide(frame, *, sample_columns, polarity=None, software=None, labeled=False)` | classmethod | stable | 0.1.0 | standard reconstruction from a derived wide frame + its sample columns; annotation inferred, header loss allowed |
+| `LCMSFeatureTable.to_memory` / `to_pandas` / `to_numpy` / `with_meta` | method | stable | core | inherited from core; **never** shadowed |
+| `ELMAVEN_ANNOTATION_COLUMNS` | data | — | 0.1.0 | the fixed El-MAVEN annotation-column names, in export order |
 | `describe_public_api()` | function | provisional | 0.1.0 | discovery hook (ADR-052 §4.4) (skeleton — implement) |
 | `helpers` | module | — | — | SHOULD placeholder for optional public cross-type helpers |
 
@@ -41,23 +49,33 @@ package's** version line. Transcribe this table for your own types (ADR-052
 
 | Group | Block | Inputs → Outputs | Parameters | Notes |
 | --- | --- | --- | --- | --- |
-| example | `ExampleBlock` | `Collection[ExampleSeries]` → `Collection[ExampleSeries]` | — | Passthrough; replace with real logic |
+| app | `ElMaven` | `Collection[Artifact]` (mzML/mzXML) → `LCMSFeatureTable` (`peaks`) | `app_command` (peakdetector path), `polarity`, `ppm`, `min_intensity`, `min_quality`, `min_good_group_count`, `min_signal_baseline_ratio`, m/z & RT range, `align_samples` | Runs El-MAVEN `peakdetector` over the raw files via the `prepare_launch` hook (one `<samples>` per file), then loads the peaks CSV into a standard table. Needs `peakdetector` on the host |
+| io | `LoadPeakTable` | file (`.csv` / `.tab` / `.tsv`) → `LCMSFeatureTable` | `polarity` (auto/positive/negative) | Loads an El-MAVEN peaks export; `auto` infers polarity from the file name |
+| process (interactive) | `BackgroundSubtraction` | `Collection[LCMSFeatureTable]` → `Collection[LCMSFeatureTable]` | interactive panel (one tab per table); roles + sample→background matching, replicate aggregation | Opens a panel pre-filled by a name heuristic; subtracts each sample's aggregated background and drops background columns (negatives kept). Headless: applies the suggestion |
+| process | `IsotopeCorrection` | `Collection[LCMSFeatureTable]` → 4 ports: `original`, `corrected`, `normalized`, `pool` (each `Collection[LCMSFeatureTable]`) | `corrector` (accucor/accucor2), `resolution`, `resolution_defined_at`, `c13_purity`, `h2n15_purity`, `label`, `charge`, `rscript_path` | Natural isotope abundance correction via embedded AccuCor/AccuCor2 R; emits all four corrector matrices; needs R + the corrector packages on the host |
+| example | `ExampleBlock` | `Collection[LCMSFeatureTable]` → `Collection[LCMSFeatureTable]` | — | Placeholder passthrough; replaced as the real LCMS blocks land |
 
 ## IO / format support (ADR-043)
 
-<Only if the package has IO blocks. List advertised vs. deferred formats and
-their `FormatCapability` records. Otherwise: "No IO blocks.">
+- `LoadPeakTable` registers a **load** `FormatCapability` for `LCMSFeatureTable`
+  over `.csv` / `.tab` / `.tsv` (format id `el_maven_peaks`), reading an
+  El-MAVEN peaks export. No saver yet.
 
 ## Previewers (ADR-048)
 
-<Only if the package ships previewers. List each previewer, the type it
-targets, and its capabilities. Otherwise: "No previewers.">
+No previewers.
 
 ## Compatibility
 
-- Requires `scistudio>=0.3.1a0` — the core 0.3.1 line ships
-  `scistudio.stability` (ADR-052 §5), which every public symbol uses.
+- Requires `scistudio>=0.3.2a0` — `ElMaven` relies on the core
+  `AppBlock.prepare_launch` hook (ADR-052 §7), first shipped on the 0.3.2 line;
+  the 0.3.1 line's `scistudio.stability` (ADR-052 §5) is also used everywhere.
 - Python `>=3.11`.
+- **`IsotopeCorrection` runtime dependency:** the host must have `R` (`Rscript`
+  on `PATH`, or set per-node via `rscript_path`) and the corrector packages
+  installed — `accucor` (`devtools::install_github("XiaoyangSu/AccuCor")`) for
+  single-isotope, plus `accucor2` / `dplyr` / `tidyr` / `stringr` / `openxlsx`
+  for dual-isotope. The block fails with a clear message when they are absent.
 
 ## OTA hot-update (#1784)
 
