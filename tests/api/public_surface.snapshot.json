@@ -1,0 +1,90 @@
+{
+  "package": "scistudio_package_lcms",
+  "surface": [
+    {
+      "kind": "class",
+      "since": "0.1.0",
+      "symbol": "scistudio_package_lcms.blocks.example:ExampleBlock",
+      "tier": "stable"
+    },
+    {
+      "kind": "data",
+      "since": null,
+      "symbol": "scistudio_package_lcms.blocks:BLOCKS",
+      "tier": null
+    },
+    {
+      "kind": "function",
+      "since": "0.1.0",
+      "symbol": "scistudio_package_lcms.previewers:get_previewers",
+      "tier": "stable"
+    },
+    {
+      "kind": "class",
+      "since": "0.1.0",
+      "symbol": "scistudio_package_lcms.types:ExampleSeries",
+      "tier": "stable"
+    },
+    {
+      "kind": "class",
+      "since": "0.1.0",
+      "symbol": "scistudio_package_lcms.types:ExampleSeries.Meta",
+      "tier": "stable"
+    },
+    {
+      "kind": "classmethod",
+      "since": "0.1.0",
+      "symbol": "scistudio_package_lcms.types:ExampleSeries.from_arrays",
+      "tier": "stable"
+    },
+    {
+      "kind": "data",
+      "since": null,
+      "symbol": "scistudio_package_lcms.types:INDEX_NAME",
+      "tier": null
+    },
+    {
+      "kind": "data",
+      "since": null,
+      "symbol": "scistudio_package_lcms.types:VALUE_NAME",
+      "tier": null
+    },
+    {
+      "kind": "function",
+      "since": "0.1.0",
+      "symbol": "scistudio_package_lcms.types:get_types",
+      "tier": "stable"
+    },
+    {
+      "kind": "data",
+      "since": null,
+      "symbol": "scistudio_package_lcms:__version__",
+      "tier": null
+    },
+    {
+      "kind": "function",
+      "since": "0.1.0",
+      "symbol": "scistudio_package_lcms:describe_public_api",
+      "tier": "provisional"
+    },
+    {
+      "kind": "function",
+      "since": "0.1.0",
+      "symbol": "scistudio_package_lcms:get_block_package",
+      "tier": "stable"
+    },
+    {
+      "kind": "function",
+      "since": "0.1.0",
+      "symbol": "scistudio_package_lcms:get_blocks",
+      "tier": "stable"
+    },
+    {
+      "kind": "function",
+      "since": "0.1.0",
+      "symbol": "scistudio_package_lcms:get_package_info",
+      "tier": "stable"
+    }
+  ],
+  "version": "0.1.0"
+}

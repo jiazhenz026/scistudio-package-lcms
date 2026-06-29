@@ -30,9 +30,22 @@ ruff format --check .            # format
 ruff check .                     # lint
 mypy src                         # types
 pytest                           # tests
-python scripts/validate_contract.py   # SciStudio plugin contract
+python scripts/validate_contract.py   # SciStudio plugin + ADR-052 §13.1 contract
+python scripts/snapshot_api.py        # ADR-052 §15 public-API surface freeze
+mkdocs build --strict                 # ADR-052 §7 generated API reference (.[docs])
 python -m build                  # wheel + sdist
 ```
+
+When you intentionally change the public API surface (add / remove / re-tier a
+public symbol), regenerate the frozen snapshot and commit it with a `CHANGELOG`
+entry:
+
+```bash
+python scripts/snapshot_api.py --write   # update tests/api/public_surface.snapshot.json
+```
+
+The snapshot and freeze test under `tests/api/**` are owner-reviewed
+(`.github/CODEOWNERS`), so the public contract cannot drift without sign-off.
 
 ## Branch, commit, PR
 

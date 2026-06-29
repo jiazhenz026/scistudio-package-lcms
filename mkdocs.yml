@@ -1,0 +1,27 @@
+# Minimal docs site that proves build parity with core (ADR-052 §7): the same
+# mkdocstrings + griffe generated API reference over the package's
+# developer-facing public surface, run against the package's own version line.
+# The full multi-version published site (mike) is deferred — see the TODO in
+# docs/reference.md.
+site_name: scistudio-package-lcms
+site_description: Example SciStudio package — generated API reference.
+
+docs_dir: docs
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            filters: ["!^_"]
+            show_root_heading: true
+            show_source: false
+            show_signature_annotations: true
+            separate_signature: true
+            members_order: source
+
+nav:
+  - Package Overview: package-overview.md
+  - API Reference: reference.md
+  - Documentation Standard: DOCUMENTATION-STANDARD.md
