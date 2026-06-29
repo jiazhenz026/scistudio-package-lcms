@@ -13,11 +13,14 @@ authors = [{ name = "SciStudio Contributors" }]
 dependencies = [
     # Core. Private and not on PyPI yet, so CI installs it from the private
     # repo (see .github/workflows/ci.yml). The version floor documents the
-    # minimum core contract this package targets: the 0.3.1 line, which ships
-    # `scistudio.stability` (ADR-052 §5) — the decorators every public symbol
-    # carries. `>=0.3.1a0` keeps the alpha line installable.
-    "scistudio>=0.3.1a0",
+    # minimum core contract this package targets: the 0.3.2 line, which ships
+    # the `AppBlock.prepare_launch` hook (ADR-052 §7) that `ElMaven` relies on,
+    # plus `scistudio.stability` (ADR-052 §5). `>=0.3.2a0` keeps the alpha line
+    # installable.
+    "scistudio>=0.3.2a0",
     "numpy>=1.24",
+    "pandas>=2.0",
+    "pyarrow>=14",
 ]
 
 [project.optional-dependencies]
@@ -55,7 +58,7 @@ example = "scistudio_package_lcms.previewers:get_previewers"
 [tool.scistudio.ota]
 manifest_url = "https://github.com/jiazhenz026/scistudio-package-lcms/releases/download/ota-alpha/manifest.json"
 channel = "alpha"
-min_core_base = "0.3.1"
+min_core_base = "0.3.2"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/scistudio_package_lcms"]
@@ -64,6 +67,10 @@ artifacts = [
     "src/scistudio_package_lcms/previewers/assets/*.js",
     "src/scistudio_package_lcms/previewers/assets/*.mjs",
     "src/scistudio_package_lcms/previewers/assets/*.css",
+    # Embedded R scripts run by blocks (e.g. IsotopeCorrection).
+    "src/scistudio_package_lcms/blocks/_r/*.R",
+    # Interactive panel ES modules served to the frontend (ADR-051).
+    "src/scistudio_package_lcms/panels/*.js",
 ]
 
 # Lint/format/type config mirrors SciStudio core so authors get the same

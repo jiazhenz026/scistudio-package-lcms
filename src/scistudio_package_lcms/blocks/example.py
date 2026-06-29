@@ -12,19 +12,18 @@ from __future__ import annotations
 
 from typing import Any, ClassVar
 
-from scistudio.blocks.base.config import BlockConfig
-from scistudio.blocks.base.ports import InputPort, OutputPort
-from scistudio.blocks.process.process_block import ProcessBlock
+from scistudio.blocks.base import BlockConfig, InputPort, OutputPort
+from scistudio.blocks.process import ProcessBlock
 from scistudio.stability import stable
 
-from scistudio_package_lcms.types import ExampleSeries
+from scistudio_package_lcms.types import LCMSFeatureTable
 
 
 @stable(since="0.1.0")
 class ExampleBlock(ProcessBlock):
-    """Pass each input series through unchanged.
+    """Pass each input feature table through unchanged.
 
-    Ports use the concrete ``ExampleSeries`` type. Concrete accepted types
+    Ports use the concrete ``LCMSFeatureTable`` type. Concrete accepted types
     drive edge-time connection checks, preview routing, and canvas semantics —
     prefer the most specific applicable ``DataObject`` subclass for every port.
     """
@@ -37,7 +36,7 @@ class ExampleBlock(ProcessBlock):
     input_ports: ClassVar[list[InputPort]] = [
         InputPort(
             name="series",
-            accepted_types=[ExampleSeries],
+            accepted_types=[LCMSFeatureTable],
             is_collection=True,
             required=True,
             description="Input series to process.",
@@ -46,7 +45,7 @@ class ExampleBlock(ProcessBlock):
     output_ports: ClassVar[list[OutputPort]] = [
         OutputPort(
             name="series",
-            accepted_types=[ExampleSeries],
+            accepted_types=[LCMSFeatureTable],
             is_collection=True,
             description="Processed series.",
         ),

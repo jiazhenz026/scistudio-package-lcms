@@ -19,8 +19,8 @@ and the surface freeze test):
 * It is listed in ``__all__`` below.
 
 Construction and reading belong **on the type** (see
-``ExampleSeries.from_arrays`` in ``types.py``); reach for this module only for
-utilities that span types or do not belong on a single one.
+``LCMSFeatureTable.from_elmaven`` in ``types.py``); reach for this module only
+for utilities that span types or do not belong on a single one.
 """
 
 from __future__ import annotations

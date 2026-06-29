@@ -24,12 +24,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from scistudio.blocks.base.package_info import PackageInfo, PackageOtaSource
+from scistudio.blocks.base import PackageInfo, PackageOtaSource
 from scistudio.stability import provisional, stable
 
 from scistudio_package_lcms.blocks import BLOCKS
 from scistudio_package_lcms.previewers import get_previewers
-from scistudio_package_lcms.types import ExampleSeries, get_types
+from scistudio_package_lcms.types import LCMSFeatureTable, get_types
 
 __version__ = "0.1.0"
 
@@ -91,7 +91,7 @@ def describe_public_api() -> dict[str, Any]:
 
 
 __all__ = [
-    "ExampleSeries",
+    "LCMSFeatureTable",
     "__version__",
     "describe_public_api",
     "get_block_package",
