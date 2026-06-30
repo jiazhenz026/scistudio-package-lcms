@@ -3,8 +3,9 @@
 # developer-facing public surface, run against the package's own version line.
 # The full multi-version published site (mike) is deferred — see the TODO in
 # docs/reference.md.
-site_name: scistudio-package-lcms
-site_description: Example SciStudio package — generated API reference.
+site_name: scistudio-blocks-lcms
+site_description: SciStudio LCMS blocks — generated API reference.
+site_url: https://jiazhenz026.github.io/scistudio-package-lcms/
 
 docs_dir: docs
 

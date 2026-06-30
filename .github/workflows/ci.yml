@@ -150,3 +150,48 @@ jobs:
               --latest
           fi
           gh release upload "$tag" dist/* --clobber
+
+  deploy-docs:
+    name: Deploy docs to Pages
+    needs: quality
+    # The mkdocstrings/griffe site renders the package's public surface for
+    # humans to browse. The wheel-bundled `_scistudio_docs/` covers the same
+    # content for the in-app agent; this is the human-facing website. Publish
+    # only on pushes to `main`; PRs just build it in the quality job.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install SciStudio core (private)
+        run: |
+          python -m pip install --upgrade pip
+          pip install "scistudio @ git+https://x-access-token:${SCISTUDIO_CORE_TOKEN}@github.com/${SCISTUDIO_CORE_REPO}.git@${SCISTUDIO_CORE_REF}"
+        env:
+          SCISTUDIO_CORE_TOKEN: ${{ secrets.SCISTUDIO_CORE_TOKEN }}
+
+      - name: Install package (docs extras)
+        run: pip install -e ".[docs]"
+
+      - name: Build site
+        run: mkdocs build --strict
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
