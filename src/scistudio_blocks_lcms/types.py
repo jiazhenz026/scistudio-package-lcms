@@ -74,6 +74,11 @@ class LCMSFeatureTable(DataFrame):
         polarity: Literal["positive", "negative"] | None = None
         #: Source tool that produced the table (e.g. ``"El-MAVEN"``).
         software: str | None = None
+        #: Originating file (set by the loader, carried through derivations).
+        #: Core's display-name resolver infers a table's user-facing name from
+        #: this when no explicit ``user['display_name']`` override is set (#1812),
+        #: so derived tables keep the source file's identity for free.
+        source_file: str | None = None
         #: Whether the table carries isotopologue labels (an ``isotopeLabel``
         #: column) — the precondition for isotope correction and flux.
         labeled: bool = False
@@ -90,6 +95,7 @@ class LCMSFeatureTable(DataFrame):
         *,
         polarity: Literal["positive", "negative"] | None = None,
         sample_columns: list[str] | None = None,
+        source_file: str | None = None,
     ) -> LCMSFeatureTable:
         """Construct a table from an El-MAVEN peaks export.
 
@@ -140,6 +146,7 @@ class LCMSFeatureTable(DataFrame):
         meta = cls.Meta(
             polarity=polarity,
             software="El-MAVEN",
+            source_file=source_file,
             labeled="isotopeLabel" in columns,
             annotation_columns=tuple(annotation),
             sample_columns=tuple(sample_columns),
@@ -159,9 +166,11 @@ class LCMSFeatureTable(DataFrame):
         frame: Any,
         *,
         sample_columns: list[str] | tuple[str, ...],
+        source: LCMSFeatureTable | None = None,
         polarity: Literal["positive", "negative"] | None = None,
         software: str | None = None,
         labeled: bool = False,
+        source_file: str | None = None,
     ) -> LCMSFeatureTable:
         """Build a standard table from a wide frame and its known sample columns.
 
@@ -172,19 +181,33 @@ class LCMSFeatureTable(DataFrame):
         example m/z or retention time) are simply absent — that header loss is
         expected and allowed.
 
+        Pass ``source`` (the input table a block is deriving from) to carry
+        provenance forward in one place: the source's ``source_file`` lands on
+        the new :class:`Meta` and its ``display_name`` / ``sheet_name`` are copied
+        onto the derived table, so core's display-name resolver (#1812) keeps
+        naming the table after its origin without the block stamping a name.
+
         Args:
             frame: A :class:`pandas.DataFrame` whose columns are the (possibly
                 reduced) annotation columns plus the per-sample columns.
             sample_columns: The sample-intensity column names; those still
                 present in *frame* become the table's ``sample_columns``.
+            source: The table this one is derived from; its provenance
+                (``source_file`` and user-facing name) is carried forward.
             polarity: Acquisition polarity to record on :class:`Meta`.
             software: Producing tool / step to record on :class:`Meta`.
             labeled: Whether the table carries isotopologue labels.
+            source_file: Originating file to record on :class:`Meta`; defaults to
+                *source*'s when ``source`` is given.
 
         Returns:
             A standard :class:`LCMSFeatureTable`.
         """
         import pyarrow as pa
+
+        source_meta = getattr(source, "meta", None) if source is not None else None
+        if source_file is None and source_meta is not None:
+            source_file = getattr(source_meta, "source_file", None)
 
         columns = [str(c) for c in frame.columns]
         samples = [c for c in sample_columns if c in columns]
@@ -192,10 +215,21 @@ class LCMSFeatureTable(DataFrame):
         meta = cls.Meta(
             polarity=polarity,
             software=software,
+            source_file=source_file,
             labeled=labeled,
             annotation_columns=tuple(annotation),
             sample_columns=tuple(samples),
         )
+        # Carry the source's user-facing name forward (core resolves the
+        # display name from user['display_name'] first, then meta.source_file).
+        user: dict[str, Any] = {}
+        if source is not None:
+            source_user = getattr(source, "user", None) or {}
+            for key in ("display_name", "sheet_name"):
+                value = source_user.get(key)
+                if value:
+                    user[key] = value
+
         table = pa.Table.from_pandas(frame, preserve_index=False)
         return cls(
             columns=columns,
@@ -203,6 +237,7 @@ class LCMSFeatureTable(DataFrame):
             schema={c: str(dtype) for c, dtype in zip(columns, frame.dtypes, strict=False)},
             data=table,
             meta=meta,
+            user=user or None,
         )
 
 

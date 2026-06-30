@@ -31,6 +31,7 @@ from scistudio.blocks.process import ProcessBlock
 from scistudio.core.types import Collection
 from scistudio.stability import stable
 
+from scistudio_blocks_lcms.blocks._naming import derived_name
 from scistudio_blocks_lcms.types import ELMAVEN_ANNOTATION_COLUMNS, LCMSFeatureTable
 
 _R_SCRIPT = "isotope_correction.R"
@@ -242,17 +243,19 @@ class IsotopeCorrection(ProcessBlock):
                 table = LCMSFeatureTable.from_wide(
                     out_frame,
                     sample_columns=sample_columns,
+                    source=item,
                     polarity=meta.polarity if meta is not None else None,
                     software=meta.software if meta is not None else None,
                     labeled=meta.labeled if meta is not None else True,
                 )
                 # Name the table after its corrector matrix so the previewer /
-                # data router show "Corrected" / "Normalized" / … instead of an
-                # unnamed table (#1812). ``sheet_name`` is the structural identity
-                # (save grouping); ``display_name`` is the presentation hook.
+                # data router show "Corrected" / "Normalized" / … (#1812), prefixed
+                # with the source file so several inputs' matrices stay distinct
+                # (e.g. "scan1_negative · Corrected"). ``sheet_name`` is the
+                # structural identity (save grouping).
                 sheet = _SHEET_NAMES[name]
                 table.user["sheet_name"] = sheet
-                table.user["display_name"] = sheet
+                table.user["display_name"] = derived_name(item, sheet)
                 tables[name] = table
         return tables
 

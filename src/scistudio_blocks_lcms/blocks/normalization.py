@@ -173,17 +173,15 @@ class Normalization(InteractiveMixin, ProcessBlock):
                 drop_reference=drop_reference,
             )
             meta = item.meta
-            outputs.append(
-                self._auto_flush(
-                    LCMSFeatureTable.from_wide(
-                        out_frame,
-                        sample_columns=list(meta.sample_columns) if meta is not None else [],
-                        polarity=meta.polarity if meta is not None else None,
-                        software=meta.software if meta is not None else None,
-                        labeled=meta.labeled if meta is not None else False,
-                    )
-                )
+            out = LCMSFeatureTable.from_wide(
+                out_frame,
+                sample_columns=list(meta.sample_columns) if meta is not None else [],
+                source=item,
+                polarity=meta.polarity if meta is not None else None,
+                software=meta.software if meta is not None else None,
+                labeled=meta.labeled if meta is not None else False,
             )
+            outputs.append(self._auto_flush(out))
 
         return {"features": Collection(outputs) if outputs else Collection([], item_type=LCMSFeatureTable)}
 

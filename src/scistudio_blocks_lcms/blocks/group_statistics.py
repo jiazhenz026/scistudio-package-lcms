@@ -35,6 +35,7 @@ from scistudio.core.types import Collection, DataFrame
 from scistudio.stability import stable
 
 from scistudio_blocks_lcms.blocks._group_stats import FDR_METHODS, TESTS, compute_stats, suggest_groups
+from scistudio_blocks_lcms.blocks._naming import derived_name
 from scistudio_blocks_lcms.blocks._results import dataframe_from_pandas
 from scistudio_blocks_lcms.types import ELMAVEN_ANNOTATION_COLUMNS, LCMSFeatureTable
 
@@ -166,7 +167,9 @@ class GroupStatistics(InteractiveMixin, ProcessBlock):
                 fdr=fdr,
                 alpha=alpha,
             )
-            outputs.append(self._auto_flush(dataframe_from_pandas(stats_frame)))
+            stats_table = dataframe_from_pandas(stats_frame)
+            stats_table.user["display_name"] = derived_name(item, "stats")
+            outputs.append(self._auto_flush(stats_table))
 
         return {"statistics": Collection(outputs) if outputs else Collection([], item_type=DataFrame)}
 

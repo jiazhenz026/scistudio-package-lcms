@@ -35,7 +35,8 @@ def _persisted_table(tmp_path: Path, stem: str = "input") -> LCMSFeatureTable:
             "Sample_B": [1743866.38, 163117.81],
         }
     )
-    table = LCMSFeatureTable.from_elmaven(frame, polarity="negative")
+    table = LCMSFeatureTable.from_elmaven(frame, polarity="negative", source_file=f"{stem}.csv")
+    table.user["display_name"] = stem
     table.save(tmp_path / f"{stem}.parquet")
     return table
 
@@ -106,10 +107,23 @@ def test_emits_four_output_ports(tmp_path: Path) -> None:
         assert result.meta.sample_columns == ("Sample_A", "Sample_B")
         assert result.meta.annotation_columns == ("compound",)
         assert result.meta.polarity == "negative"
-        # The table is named after its corrector matrix so the previewer shows
-        # it (#1812): "Original" / "Corrected" / "Normalized" / "Pool size".
-        assert result.user["display_name"] == _SHEET_NAMES[name]
+        # The table is named after its corrector matrix, prefixed with the source
+        # file so several inputs' matrices stay distinct (#1812).
+        assert result.user["display_name"] == f"input · {_SHEET_NAMES[name]}"
         assert result.user["sheet_name"] == _SHEET_NAMES[name]
+
+
+def test_matrix_names_are_distinct_per_source_file(tmp_path: Path) -> None:
+    """Several inputs' corrector matrices keep distinct names (source file prefix)."""
+    fake = _fake_rscript(tmp_path)
+    config = BlockConfig(params={"corrector": "accucor", "rscript_path": str(fake), "resolution": 100000})
+    t1 = _persisted_table(tmp_path, stem="scan1_negative")
+    t2 = _persisted_table(tmp_path, stem="scan2_positive")
+
+    out = IsotopeCorrection().run({"features": Collection([t1, t2])}, config)
+
+    corrected_names = [tbl.user["display_name"] for tbl in out["corrected"]]
+    assert corrected_names == ["scan1_negative · Corrected", "scan2_positive · Corrected"]
 
 
 def test_collection_of_tables_wraps_per_port(tmp_path: Path) -> None:

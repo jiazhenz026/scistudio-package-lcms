@@ -6,6 +6,23 @@ All notable changes to this package are documented here. The format follows
 
 ## [Unreleased]
 
+- Multi-file IO + table naming:
+  - `LoadPeakTable` now loads **one or several** files (a `path` list) into a
+    `Collection[LCMSFeatureTable]` — one table per file — and records each file
+    on `LCMSFeatureTable.Meta.source_file` plus the file stem as the table's
+    display name.
+  - `SavePeakTable` (new) writes feature table(s) to CSV: a single table to a
+    `.csv` path, or one CSV per table (named by `display_name`, de-duplicated)
+    into a folder when given a collection. (Note: a single saver call still
+    writes one file each; multi-file means one file per collection item.)
+  - `LCMSFeatureTable.Meta` gains `source_file`, and
+    `LCMSFeatureTable.from_wide(…, source=<input table>)` carries the source's
+    provenance (`source_file`) and user-facing name to the derived table — so
+    core's display-name resolver (#1812) names the whole pipeline from the
+    origin file with no per-block stamping. Blocks that emit a *specifically
+    named* product (the corrector matrices, MID / enrichment, statistics,
+    consumption/release) compose `"<source file> · <product>"` (e.g.
+    `scan1_negative · Corrected`) so several inputs' products stay distinct.
 - `IsotopeCorrection` fix — El-MAVEN ≥ 0.4 can report one compound as several
   peak groups (same `compound`, different `metaGroupId`), which AccuCor /
   AccuCor2 reject ("Multiple peak groups detected … use metaGroupId column").

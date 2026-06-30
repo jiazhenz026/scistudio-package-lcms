@@ -23,6 +23,7 @@ from scistudio.core.types import Collection
 from scistudio.stability import stable
 
 from scistudio_blocks_lcms.blocks._mid import compute_mid_and_enrichment
+from scistudio_blocks_lcms.blocks._naming import derived_name
 from scistudio_blocks_lcms.types import ELMAVEN_ANNOTATION_COLUMNS, LCMSFeatureTable
 
 
@@ -76,28 +77,26 @@ class CalculateMID(ProcessBlock):
             samples = _sample_columns(item, frame)
             mid_frame, enrichment_frame = compute_mid_and_enrichment(frame, sample_columns=samples)
             meta = item.meta
-            mids.append(
-                self._auto_flush(
-                    LCMSFeatureTable.from_wide(
-                        mid_frame,
-                        sample_columns=samples,
-                        polarity=meta.polarity if meta is not None else None,
-                        software=meta.software if meta is not None else None,
-                        labeled=True,
-                    )
-                )
+            mid_table = LCMSFeatureTable.from_wide(
+                mid_frame,
+                sample_columns=samples,
+                source=item,
+                polarity=meta.polarity if meta is not None else None,
+                software=meta.software if meta is not None else None,
+                labeled=True,
             )
-            enrichments.append(
-                self._auto_flush(
-                    LCMSFeatureTable.from_wide(
-                        enrichment_frame,
-                        sample_columns=samples,
-                        polarity=meta.polarity if meta is not None else None,
-                        software=meta.software if meta is not None else None,
-                        labeled=False,
-                    )
-                )
+            mid_table.user["display_name"] = derived_name(item, "MID")
+            mids.append(self._auto_flush(mid_table))
+            enrichment_table = LCMSFeatureTable.from_wide(
+                enrichment_frame,
+                sample_columns=samples,
+                source=item,
+                polarity=meta.polarity if meta is not None else None,
+                software=meta.software if meta is not None else None,
+                labeled=False,
             )
+            enrichment_table.user["display_name"] = derived_name(item, "enrichment")
+            enrichments.append(self._auto_flush(enrichment_table))
 
         return {
             "mid": Collection(mids) if mids else Collection([], item_type=LCMSFeatureTable),

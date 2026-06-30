@@ -34,6 +34,7 @@ from scistudio.stability import stable
 
 from scistudio_blocks_lcms.blocks._consumption import compute_consumption, suggest_reference_group
 from scistudio_blocks_lcms.blocks._group_stats import suggest_groups
+from scistudio_blocks_lcms.blocks._naming import derived_name
 from scistudio_blocks_lcms.blocks._results import dataframe_from_pandas
 from scistudio_blocks_lcms.types import ELMAVEN_ANNOTATION_COLUMNS, LCMSFeatureTable
 
@@ -191,7 +192,9 @@ class ConsumptionRelease(InteractiveMixin, ProcessBlock):
                 cell_numbers=cell_numbers,
                 dt=dt,
             )
-            outputs.append(self._auto_flush(dataframe_from_pandas(out_frame)))
+            rates_table = dataframe_from_pandas(out_frame)
+            rates_table.user["display_name"] = derived_name(item, "consumption/release")
+            outputs.append(self._auto_flush(rates_table))
 
         return {"rates": Collection(outputs) if outputs else Collection([], item_type=DataFrame)}
 

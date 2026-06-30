@@ -116,6 +116,12 @@
       "tier": "provisional"
     },
     {
+      "kind": "class",
+      "since": "0.1.0",
+      "symbol": "scistudio_blocks_lcms.blocks.save_peak_table:SavePeakTable",
+      "tier": "stable"
+    },
+    {
       "kind": "data",
       "since": null,
       "symbol": "scistudio_blocks_lcms.blocks:BLOCKS",

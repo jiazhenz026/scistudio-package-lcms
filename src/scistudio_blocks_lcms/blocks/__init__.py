@@ -17,10 +17,12 @@ from scistudio_blocks_lcms.blocks.load_peak_table import LoadPeakTable
 from scistudio_blocks_lcms.blocks.log2_mean_center import Log2MeanCenter
 from scistudio_blocks_lcms.blocks.metabolite_export import MetaboliteExport
 from scistudio_blocks_lcms.blocks.normalization import Normalization
+from scistudio_blocks_lcms.blocks.save_peak_table import SavePeakTable
 
 BLOCKS: tuple[type, ...] = (
     ElMaven,
     LoadPeakTable,
+    SavePeakTable,
     BackgroundSubtraction,
     Normalization,
     Log2MeanCenter,
@@ -45,4 +47,5 @@ __all__ = [
     "Log2MeanCenter",
     "MetaboliteExport",
     "Normalization",
+    "SavePeakTable",
 ]
