@@ -6,7 +6,7 @@ from importlib.metadata import entry_points
 
 import scistudio_blocks_lcms as pkg
 
-DIST = "scistudio-package-lcms"
+DIST = "scistudio-blocks-lcms"
 GROUPS = ("scistudio.blocks", "scistudio.types", "scistudio.previewers")
 
 

@@ -3,9 +3,9 @@ requires = ["hatchling>=1.24"]
 build-backend = "hatchling.build"
 
 [project]
-name = "scistudio-package-lcms"
+name = "scistudio-blocks-lcms"
 version = "0.1.0"
-description = "Example SciStudio package — copy this template to start a new package."
+description = "SciStudio LCMS blocks: feature-table load, background, isotope correction, and downstream analysis."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"

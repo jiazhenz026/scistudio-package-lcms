@@ -46,7 +46,7 @@ OTA_CHANNEL = "alpha"
 def get_package_info() -> PackageInfo:
     """Return package metadata for the ``scistudio.blocks`` registry."""
     return PackageInfo(
-        name="scistudio-package-lcms",
+        name="scistudio-blocks-lcms",
         description="SciStudio LCMS package.",
         author="SciStudio Contributors",
         version=__version__,
