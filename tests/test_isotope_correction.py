@@ -18,7 +18,7 @@ from scistudio.blocks.base import BlockConfig
 from scistudio.core.types import Collection
 
 from scistudio_blocks_lcms.blocks import IsotopeCorrection
-from scistudio_blocks_lcms.blocks.isotope_correction import _OUTPUTS, _resolve_rscript
+from scistudio_blocks_lcms.blocks.isotope_correction import _OUTPUTS, _SHEET_NAMES, _resolve_rscript
 from scistudio_blocks_lcms.types import LCMSFeatureTable
 
 
@@ -106,6 +106,10 @@ def test_emits_four_output_ports(tmp_path: Path) -> None:
         assert result.meta.sample_columns == ("Sample_A", "Sample_B")
         assert result.meta.annotation_columns == ("compound",)
         assert result.meta.polarity == "negative"
+        # The table is named after its corrector matrix so the previewer shows
+        # it (#1812): "Original" / "Corrected" / "Normalized" / "Pool size".
+        assert result.user["display_name"] == _SHEET_NAMES[name]
+        assert result.user["sheet_name"] == _SHEET_NAMES[name]
 
 
 def test_collection_of_tables_wraps_per_port(tmp_path: Path) -> None:

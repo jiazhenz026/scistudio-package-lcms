@@ -13,6 +13,10 @@ All notable changes to this package are documented here. The format follows
   compound spans more than one group (e.g. `Glucose` → `Glucose [g1]`,
   `Glucose [g2]`), so each group is corrected independently. Validated against
   real AccuCor; a regression test runs when R + accucor are present.
+  Each of the four output tables is now named after its corrector matrix
+  (`display_name` / `sheet_name` = "Original" / "Corrected" / "Normalized" /
+  "Pool size") so the previewer shows the matrix's identity instead of an
+  unnamed table (#1812).
 - Distribution renamed `scistudio-package-lcms` → `scistudio-blocks-lcms` and the
   import module `scistudio_package_lcms` → `scistudio_blocks_lcms`, so the
   desktop Package Manager installs it (it discovers `scistudio_blocks_*` modules)

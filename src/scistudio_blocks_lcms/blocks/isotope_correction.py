@@ -39,6 +39,16 @@ _R_SCRIPT = "isotope_correction.R"
 #: a ``<name>.csv`` the embedded R writes into the run's output directory.
 _OUTPUTS = ("original", "corrected", "normalized", "pool")
 
+#: Human-facing sheet names per output port — stamped as the table's
+#: ``display_name`` (and ``sheet_name``) so the previewer / data router show the
+#: corrector matrix's identity (#1812) instead of an unnamed table.
+_SHEET_NAMES = {
+    "original": "Original",
+    "corrected": "Corrected",
+    "normalized": "Normalized",
+    "pool": "Pool size",
+}
+
 
 def _resolve_rscript(config: BlockConfig) -> str:
     """Return the Rscript executable path, or raise a clear error."""
@@ -229,13 +239,21 @@ class IsotopeCorrection(ProcessBlock):
                     out_frame = pd.read_csv(path)
                 except pd.errors.EmptyDataError:
                     out_frame = pd.DataFrame()
-                tables[name] = LCMSFeatureTable.from_wide(
+                table = LCMSFeatureTable.from_wide(
                     out_frame,
                     sample_columns=sample_columns,
                     polarity=meta.polarity if meta is not None else None,
                     software=meta.software if meta is not None else None,
                     labeled=meta.labeled if meta is not None else True,
                 )
+                # Name the table after its corrector matrix so the previewer /
+                # data router show "Corrected" / "Normalized" / … instead of an
+                # unnamed table (#1812). ``sheet_name`` is the structural identity
+                # (save grouping); ``display_name`` is the presentation hook.
+                sheet = _SHEET_NAMES[name]
+                table.user["sheet_name"] = sheet
+                table.user["display_name"] = sheet
+                tables[name] = table
         return tables
 
     @staticmethod
