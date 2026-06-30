@@ -175,3 +175,50 @@ def test_env_contract_passes_parameters(tmp_path: Path) -> None:
     assert env["ACCUCOR_LABEL"] == "CH"
     assert env["ACCUCOR_C13_PURITY"] == "1"
     assert env["ACCUCOR_SAMPLE_COLUMNS"] == "Sample_A,Sample_B"
+
+
+# --- Real-accucor regression: El-MAVEN >= 0.4 multiple peak groups (#10) --------
+# Skipped where R / accucor are unavailable (e.g. CI); runs on a host that has
+# them (the embedded R's contract is validated there).
+import shutil  # noqa: E402
+import subprocess  # noqa: E402
+
+
+def _has_real_accucor() -> bool:
+    rscript = shutil.which("Rscript")
+    if rscript is None:
+        return False
+    proc = subprocess.run(
+        [rscript, "-e", 'cat(requireNamespace("accucor", quietly=TRUE))'],
+        capture_output=True,
+        text=True,
+    )
+    return proc.returncode == 0 and "TRUE" in proc.stdout
+
+
+@pytest.mark.skipif(not _has_real_accucor(), reason="real R + accucor not installed")
+def test_accucor_disambiguates_multiple_peak_groups(tmp_path: Path) -> None:
+    # "Glucose" appears as two El-MAVEN peak groups (metaGroupId 1 & 2). AccuCor
+    # rejects duplicate compounds, so the R script folds the peak-group id into
+    # the compound name; each group is corrected independently.
+    frame = pd.DataFrame(
+        {
+            "metaGroupId": [1, 1, 2, 2, 3, 3],
+            "isotopeLabel": ["C12 PARENT", "C13-label-1", "C12 PARENT", "C13-label-1", "C12 PARENT", "C13-label-1"],
+            "compound": ["Glucose", "Glucose", "Glucose", "Glucose", "Lactate", "Lactate"],
+            "formula": ["C6H12O6", "C6H12O6", "C6H12O6", "C6H12O6", "C3H6O3", "C3H6O3"],
+            "s1": [100.0, 10.0, 80.0, 8.0, 50.0, 5.0],
+            "s2": [120.0, 12.0, 90.0, 9.0, 60.0, 6.0],
+        }
+    )
+    table = LCMSFeatureTable.from_elmaven(frame, polarity="negative", sample_columns=["s1", "s2"])
+    table.save(tmp_path / "in.parquet")
+    config = BlockConfig(params={"corrector": "accucor", "resolution": 100000, "resolution_defined_at": 200})
+
+    out = IsotopeCorrection().run({"features": Collection([table])}, config)
+    corrected = out["corrected"][0]
+    corrected.save(tmp_path / "corrected.parquet")
+    compounds = set(corrected.to_pandas()["Compound"])
+
+    assert "Glucose [g1]" in compounds and "Glucose [g2]" in compounds  # two groups split
+    assert "Lactate" in compounds  # single-group compound left untouched

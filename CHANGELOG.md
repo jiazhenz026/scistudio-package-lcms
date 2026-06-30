@@ -6,6 +6,17 @@ All notable changes to this package are documented here. The format follows
 
 ## [Unreleased]
 
+- `IsotopeCorrection` fix — El-MAVEN ≥ 0.4 can report one compound as several
+  peak groups (same `compound`, different `metaGroupId`), which AccuCor /
+  AccuCor2 reject ("Multiple peak groups detected … use metaGroupId column").
+  The embedded R now folds the peak-group id into the compound name where a
+  compound spans more than one group (e.g. `Glucose` → `Glucose [g1]`,
+  `Glucose [g2]`), so each group is corrected independently. Validated against
+  real AccuCor; a regression test runs when R + accucor are present.
+- Distribution renamed `scistudio-package-lcms` → `scistudio-blocks-lcms` and the
+  import module `scistudio_package_lcms` → `scistudio_blocks_lcms`, so the
+  desktop Package Manager installs it (it discovers `scistudio_blocks_*` modules)
+  and the palette groups it as a plugin package rather than under SciStudio Core.
 - Downstream-analysis blocks (#10) — the reusable, general steps of the three
   core LCMS analyses (consumption/release, untargeted, isotope tracing),
   abstracted out of the lab-specific flux pipeline. Data type is unchanged
