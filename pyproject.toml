@@ -21,6 +21,9 @@ dependencies = [
     "numpy>=1.24",
     "pandas>=2.0",
     "pyarrow>=14",
+    # GroupStatistics uses scipy.stats (t-test, ANOVA, linear regression); the
+    # BH correction is implemented locally, so statsmodels is not required.
+    "scipy>=1.10",
 ]
 
 [project.optional-dependencies]

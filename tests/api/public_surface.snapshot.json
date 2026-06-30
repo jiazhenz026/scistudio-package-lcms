@@ -22,6 +22,30 @@
     {
       "kind": "class",
       "since": "0.1.0",
+      "symbol": "scistudio_package_lcms.blocks.calculate_mid:CalculateMID",
+      "tier": "stable"
+    },
+    {
+      "kind": "class",
+      "since": "0.1.0",
+      "symbol": "scistudio_package_lcms.blocks.consumption_release:ConsumptionRelease",
+      "tier": "stable"
+    },
+    {
+      "kind": "data",
+      "since": "0.3.1",
+      "symbol": "scistudio_package_lcms.blocks.consumption_release:execution_mode",
+      "tier": "stable"
+    },
+    {
+      "kind": "data",
+      "since": "0.3.1",
+      "symbol": "scistudio_package_lcms.blocks.consumption_release:interactive_panel",
+      "tier": "provisional"
+    },
+    {
+      "kind": "class",
+      "since": "0.1.0",
       "symbol": "scistudio_package_lcms.blocks.elmaven:ElMaven",
       "tier": "stable"
     },
@@ -34,6 +58,24 @@
     {
       "kind": "class",
       "since": "0.1.0",
+      "symbol": "scistudio_package_lcms.blocks.group_statistics:GroupStatistics",
+      "tier": "stable"
+    },
+    {
+      "kind": "data",
+      "since": "0.3.1",
+      "symbol": "scistudio_package_lcms.blocks.group_statistics:execution_mode",
+      "tier": "stable"
+    },
+    {
+      "kind": "data",
+      "since": "0.3.1",
+      "symbol": "scistudio_package_lcms.blocks.group_statistics:interactive_panel",
+      "tier": "provisional"
+    },
+    {
+      "kind": "class",
+      "since": "0.1.0",
       "symbol": "scistudio_package_lcms.blocks.isotope_correction:IsotopeCorrection",
       "tier": "stable"
     },
@@ -42,6 +84,36 @@
       "since": "0.1.0",
       "symbol": "scistudio_package_lcms.blocks.load_peak_table:LoadPeakTable",
       "tier": "stable"
+    },
+    {
+      "kind": "class",
+      "since": "0.1.0",
+      "symbol": "scistudio_package_lcms.blocks.log2_mean_center:Log2MeanCenter",
+      "tier": "stable"
+    },
+    {
+      "kind": "class",
+      "since": "0.1.0",
+      "symbol": "scistudio_package_lcms.blocks.metabolite_export:MetaboliteExport",
+      "tier": "stable"
+    },
+    {
+      "kind": "class",
+      "since": "0.1.0",
+      "symbol": "scistudio_package_lcms.blocks.normalization:Normalization",
+      "tier": "stable"
+    },
+    {
+      "kind": "data",
+      "since": "0.3.1",
+      "symbol": "scistudio_package_lcms.blocks.normalization:execution_mode",
+      "tier": "stable"
+    },
+    {
+      "kind": "data",
+      "since": "0.3.1",
+      "symbol": "scistudio_package_lcms.blocks.normalization:interactive_panel",
+      "tier": "provisional"
     },
     {
       "kind": "data",
