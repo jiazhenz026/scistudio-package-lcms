@@ -17,3 +17,6 @@ htmlcov/
 
 # Generated docs site (mkdocs build output)
 site/
+
+# Build-generated SciStudio docs bundle packaged into wheels
+src/*/_scistudio_docs/

@@ -6,6 +6,11 @@ All notable changes to this package are documented here. The format follows
 
 ## [Unreleased]
 
+- Wheel-bundled docs (template parity): a Hatch build hook (`hatch_build.py` →
+  `scripts/build_package_docs.py`) generates `src/<module>/_scistudio_docs/` at
+  wheel-build time and ships it in the wheel, so SciStudio core can inject this
+  package's docs (manifest + agent / API reference + user guide) into projects.
+  The directory is git-ignored and recreated per build.
 - Multi-file IO + table naming:
   - `LoadPeakTable` now loads **one or several** files (a `path` list) into a
     `Collection[LCMSFeatureTable]` — one table per file — and records each file

@@ -65,7 +65,8 @@ min_core_base = "0.3.2"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/scistudio_blocks_lcms"]
-# Ship any packaged previewer frontend assets in the wheel.
+# Ship packaged previewer frontend assets and the build-generated SciStudio
+# package docs bundle in the wheel.
 artifacts = [
     "src/scistudio_blocks_lcms/previewers/assets/*.js",
     "src/scistudio_blocks_lcms/previewers/assets/*.mjs",
@@ -74,7 +75,14 @@ artifacts = [
     "src/scistudio_blocks_lcms/blocks/_r/*.R",
     # Interactive panel ES modules served to the frontend (ADR-051).
     "src/scistudio_blocks_lcms/panels/*.js",
+    # Build-generated docs bundle SciStudio core injects into projects.
+    "src/scistudio_blocks_lcms/_scistudio_docs/**/*",
 ]
+
+# Build hook: stage `src/<module>/_scistudio_docs/` at wheel-build time so core
+# can inject installed package docs into projects (see hatch_build.py).
+[tool.hatch.build.hooks.custom]
+path = "hatch_build.py"
 
 # Lint/format/type config mirrors SciStudio core so authors get the same
 # feedback locally as in the monorepo.
