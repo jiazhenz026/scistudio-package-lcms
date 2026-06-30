@@ -31,8 +31,8 @@ from scistudio.blocks.base import BlockConfig, InputPort, OutputPort
 from scistudio.core.types import Artifact, Collection
 from scistudio.stability import stable
 
-from scistudio_package_lcms.blocks.load_peak_table import LoadPeakTable
-from scistudio_package_lcms.types import LCMSFeatureTable
+from scistudio_blocks_lcms.blocks.load_peak_table import LoadPeakTable
+from scistudio_blocks_lcms.types import LCMSFeatureTable
 
 _MS_EXTENSIONS = (".mzml", ".mzxml")
 _IONIZATION_MODE = {"positive": "1", "negative": "-1", "neutral": "0"}

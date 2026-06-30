@@ -23,9 +23,9 @@ import pytest
 from scistudio.core.types import DataObject
 from scistudio.stability import get_stability
 
-import scistudio_package_lcms as pkg
-from scistudio_package_lcms.blocks import ExampleBlock
-from scistudio_package_lcms.types import LCMSFeatureTable
+import scistudio_blocks_lcms as pkg
+from scistudio_blocks_lcms.blocks import ExampleBlock
+from scistudio_blocks_lcms.types import LCMSFeatureTable
 
 
 def _elmaven_frame() -> pd.DataFrame:
@@ -56,7 +56,7 @@ def test_reuse_surface_validator_passes() -> None:
     """The shipped template satisfies the package-agnostic §13.1 validator."""
     validator = _load_validator()
     # Raises SystemExit on any violation; passing means the surface is compliant.
-    validator._validate_reuse_surface("scistudio_package_lcms", pkg.get_types())
+    validator._validate_reuse_surface("scistudio_blocks_lcms", pkg.get_types())
 
 
 def test_from_elmaven_packs_a_feature_table() -> None:

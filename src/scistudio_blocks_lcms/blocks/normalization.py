@@ -11,7 +11,7 @@ likely spiked standards, which the user confirms or overrides. Running without a
 panel decision (headless) applies the ``method`` configured on the block.
 
 Normalization cancels *technical* variation between samples (extraction,
-injection volume); it is distinct from :class:`~scistudio_package_lcms.blocks.log2_mean_center.Log2MeanCenter`,
+injection volume); it is distinct from :class:`~scistudio_blocks_lcms.blocks.log2_mean_center.Log2MeanCenter`,
 which transforms each feature *across* samples for comparability.
 """
 
@@ -34,12 +34,12 @@ from scistudio.blocks.process import ProcessBlock
 from scistudio.core.types import Collection
 from scistudio.stability import stable
 
-from scistudio_package_lcms.blocks._normalization import METHODS, apply_normalization, suggest_reference
-from scistudio_package_lcms.types import LCMSFeatureTable
+from scistudio_blocks_lcms.blocks._normalization import METHODS, apply_normalization, suggest_reference
+from scistudio_blocks_lcms.types import LCMSFeatureTable
 
-_PANEL_ID = "scistudio_package_lcms.interactive.normalization"
+_PANEL_ID = "scistudio_blocks_lcms.interactive.normalization"
 #: Absolute on-disk dir the backend serves the panel asset from (ADR-051 §7).
-_PANEL_ASSET_ROOT = str(files("scistudio_package_lcms").joinpath("panels"))
+_PANEL_ASSET_ROOT = str(files("scistudio_blocks_lcms").joinpath("panels"))
 
 _COMPOUND_COLUMN = "compound"
 _LABEL_COLUMN = "isotopeLabel"
@@ -50,7 +50,7 @@ def _sample_columns(item: LCMSFeatureTable, frame: Any) -> list[str]:
     meta = item.meta
     if meta is not None and meta.sample_columns:
         return [c for c in meta.sample_columns if c in frame.columns]
-    from scistudio_package_lcms.types import ELMAVEN_ANNOTATION_COLUMNS
+    from scistudio_blocks_lcms.types import ELMAVEN_ANNOTATION_COLUMNS
 
     return [str(c) for c in frame.columns if c not in ELMAVEN_ANNOTATION_COLUMNS]
 

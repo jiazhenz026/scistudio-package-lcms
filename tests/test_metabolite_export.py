@@ -7,9 +7,9 @@ from pathlib import Path
 import pandas as pd
 from scistudio.blocks.base import BlockConfig
 
-from scistudio_package_lcms.blocks import MetaboliteExport
-from scistudio_package_lcms.blocks._results import dataframe_from_pandas
-from scistudio_package_lcms.blocks.metabolite_export import _annotate
+from scistudio_blocks_lcms.blocks import MetaboliteExport
+from scistudio_blocks_lcms.blocks._results import dataframe_from_pandas
+from scistudio_blocks_lcms.blocks.metabolite_export import _annotate
 
 
 def _table() -> pd.DataFrame:

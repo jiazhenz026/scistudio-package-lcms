@@ -17,9 +17,9 @@ import pytest
 from scistudio.blocks.base import BlockConfig
 from scistudio.core.types import Collection
 
-from scistudio_package_lcms.blocks import IsotopeCorrection
-from scistudio_package_lcms.blocks.isotope_correction import _OUTPUTS, _resolve_rscript
-from scistudio_package_lcms.types import LCMSFeatureTable
+from scistudio_blocks_lcms.blocks import IsotopeCorrection
+from scistudio_blocks_lcms.blocks.isotope_correction import _OUTPUTS, _resolve_rscript
+from scistudio_blocks_lcms.types import LCMSFeatureTable
 
 
 def _persisted_table(tmp_path: Path, stem: str = "input") -> LCMSFeatureTable:
@@ -82,7 +82,7 @@ def test_ports_and_config() -> None:
 
 def test_missing_rscript_raises(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
-        "scistudio_package_lcms.blocks.isotope_correction.shutil.which",
+        "scistudio_blocks_lcms.blocks.isotope_correction.shutil.which",
         lambda _name: None,
     )
     with pytest.raises(RuntimeError, match="Rscript was not found"):

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from scistudio_package_lcms.blocks import ExampleBlock
+from scistudio_blocks_lcms.blocks import ExampleBlock
 
 
 def test_ports_declared() -> None:

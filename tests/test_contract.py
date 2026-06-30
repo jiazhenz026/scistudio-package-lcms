@@ -7,8 +7,8 @@ from pathlib import Path
 
 from scistudio.blocks.base import Block, PackageInfo
 
-import scistudio_package_lcms as pkg
-from scistudio_package_lcms.types import LCMSFeatureTable
+import scistudio_blocks_lcms as pkg
+from scistudio_blocks_lcms.types import LCMSFeatureTable
 
 
 def test_get_block_package_shape() -> None:

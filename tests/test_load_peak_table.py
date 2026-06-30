@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from scistudio_package_lcms.blocks import LoadPeakTable
-from scistudio_package_lcms.types import LCMSFeatureTable
+from scistudio_blocks_lcms.blocks import LoadPeakTable
+from scistudio_blocks_lcms.types import LCMSFeatureTable
 
 
 def _write_elmaven_csv(path: Path, *, sep: str = ",") -> None:

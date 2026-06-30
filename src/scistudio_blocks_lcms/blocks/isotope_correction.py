@@ -31,7 +31,7 @@ from scistudio.blocks.process import ProcessBlock
 from scistudio.core.types import Collection
 from scistudio.stability import stable
 
-from scistudio_package_lcms.types import ELMAVEN_ANNOTATION_COLUMNS, LCMSFeatureTable
+from scistudio_blocks_lcms.types import ELMAVEN_ANNOTATION_COLUMNS, LCMSFeatureTable
 
 _R_SCRIPT = "isotope_correction.R"
 
@@ -207,7 +207,7 @@ class IsotopeCorrection(ProcessBlock):
             frame.to_csv(input_csv, index=False)
 
             env = self._build_env(config, corrector, input_csv, output_dir, workdir, sample_columns)
-            with as_file(files("scistudio_package_lcms.blocks").joinpath("_r", _R_SCRIPT)) as script_path:
+            with as_file(files("scistudio_blocks_lcms.blocks").joinpath("_r", _R_SCRIPT)) as script_path:
                 proc = subprocess.run(
                     [rscript, str(script_path)],
                     env=env,

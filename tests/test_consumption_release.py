@@ -9,11 +9,11 @@ import pytest
 from scistudio.blocks.base import INTERACTIVE_RESPONSE_KEY, BlockConfig
 from scistudio.core.types import Collection
 
-from scistudio_package_lcms.blocks import ConsumptionRelease
-from scistudio_package_lcms.blocks._consumption import compute_consumption, suggest_reference_group
-from scistudio_package_lcms.blocks._group_stats import suggest_groups
-from scistudio_package_lcms.blocks._results import dataframe_from_pandas
-from scistudio_package_lcms.types import LCMSFeatureTable
+from scistudio_blocks_lcms.blocks import ConsumptionRelease
+from scistudio_blocks_lcms.blocks._consumption import compute_consumption, suggest_reference_group
+from scistudio_blocks_lcms.blocks._group_stats import suggest_groups
+from scistudio_blocks_lcms.blocks._results import dataframe_from_pandas
+from scistudio_blocks_lcms.types import LCMSFeatureTable
 
 _SAMPLES = ["fresh1", "fresh2", "spent1", "spent2"]
 

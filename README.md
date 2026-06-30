@@ -17,7 +17,7 @@ The conventions follow `scistudio-blocks-spectroscopy`, the reference package.
    repo so CI can install it. Until core is on PyPI, every block repo needs
    this secret.
 3. Rename the package to your domain:
-   - `src/scistudio_package_lcms/` → `src/scistudio_blocks_<domain>/`
+   - `src/scistudio_blocks_lcms/` → `src/scistudio_blocks_<domain>/`
    - In `pyproject.toml`: `[project].name`, the three `[project.entry-points...]`
      references, `[tool.hatch.build.targets.wheel].packages`, and
      `known-first-party`.
@@ -51,7 +51,7 @@ The conventions follow `scistudio-blocks-spectroscopy`, the reference package.
 ├── scripts/
 │   ├── validate_contract.py        # entry-point + registry + §13.1 reuse-surface check
 │   └── snapshot_api.py             # compute/freeze the public surface (ADR-052 §15)
-├── src/scistudio_package_lcms/   # example: 1 type (+ contract skeletons), 1 block, previewers stub
+├── src/scistudio_blocks_lcms/   # example: 1 type (+ contract skeletons), 1 block, previewers stub
 └── tests/                          # packaging · contract · developer-contract · freeze · block tests
 ```
 

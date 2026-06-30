@@ -16,8 +16,8 @@ from pathlib import Path
 from scistudio.blocks.base import BlockConfig
 from scistudio.core.types import Artifact, Collection
 
-from scistudio_package_lcms.blocks import ElMaven
-from scistudio_package_lcms.types import LCMSFeatureTable
+from scistudio_blocks_lcms.blocks import ElMaven
+from scistudio_blocks_lcms.types import LCMSFeatureTable
 
 
 def test_prepare_launch_injects_every_sample(tmp_path: Path) -> None:

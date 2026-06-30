@@ -3,7 +3,7 @@
 A :class:`~scistudio.blocks.io.simple_io.SimpleLoader`: the user points the
 block at an El-MAVEN ``*_peaks_*.csv`` (or tab-delimited) export and it reads
 the file into the package's :class:`LCMSFeatureTable` via the type's
-:meth:`~scistudio_package_lcms.types.LCMSFeatureTable.from_elmaven` constructor.
+:meth:`~scistudio_blocks_lcms.types.LCMSFeatureTable.from_elmaven` constructor.
 The framework synthesizes the load
 :class:`~scistudio.blocks.io.FormatCapability` from the class attributes.
 """
@@ -17,7 +17,7 @@ from scistudio.blocks.base import OutputPort
 from scistudio.blocks.io import SimpleLoader
 from scistudio.stability import stable
 
-from scistudio_package_lcms.types import LCMSFeatureTable
+from scistudio_blocks_lcms.types import LCMSFeatureTable
 
 
 def _infer_polarity(name: str) -> Literal["positive", "negative"] | None:

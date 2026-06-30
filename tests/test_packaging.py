@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from importlib.metadata import entry_points
 
-import scistudio_package_lcms as pkg
+import scistudio_blocks_lcms as pkg
 
 DIST = "scistudio-package-lcms"
 GROUPS = ("scistudio.blocks", "scistudio.types", "scistudio.previewers")

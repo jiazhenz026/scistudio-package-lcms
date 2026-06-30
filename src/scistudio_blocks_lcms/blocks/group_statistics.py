@@ -34,12 +34,12 @@ from scistudio.blocks.process import ProcessBlock
 from scistudio.core.types import Collection, DataFrame
 from scistudio.stability import stable
 
-from scistudio_package_lcms.blocks._group_stats import FDR_METHODS, TESTS, compute_stats, suggest_groups
-from scistudio_package_lcms.blocks._results import dataframe_from_pandas
-from scistudio_package_lcms.types import ELMAVEN_ANNOTATION_COLUMNS, LCMSFeatureTable
+from scistudio_blocks_lcms.blocks._group_stats import FDR_METHODS, TESTS, compute_stats, suggest_groups
+from scistudio_blocks_lcms.blocks._results import dataframe_from_pandas
+from scistudio_blocks_lcms.types import ELMAVEN_ANNOTATION_COLUMNS, LCMSFeatureTable
 
-_PANEL_ID = "scistudio_package_lcms.interactive.group_statistics"
-_PANEL_ASSET_ROOT = str(files("scistudio_package_lcms").joinpath("panels"))
+_PANEL_ID = "scistudio_blocks_lcms.interactive.group_statistics"
+_PANEL_ASSET_ROOT = str(files("scistudio_blocks_lcms").joinpath("panels"))
 
 
 def _sample_columns(item: LCMSFeatureTable, frame: Any) -> list[str]:

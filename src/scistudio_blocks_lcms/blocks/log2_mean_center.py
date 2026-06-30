@@ -8,7 +8,7 @@ and low-abundance features on one comparable scale — the input a heatmap or a
 group comparison wants.
 
 It works *across* samples, per feature (row), and is therefore orthogonal to
-:class:`~scistudio_package_lcms.blocks.normalization.Normalization`, which divides
+:class:`~scistudio_blocks_lcms.blocks.normalization.Normalization`, which divides
 *within* a sample by an internal standard. The two are typically run in order:
 normalize first, then log2-mean-center.
 
@@ -26,7 +26,7 @@ from scistudio.blocks.process import ProcessBlock
 from scistudio.core.types import Collection
 from scistudio.stability import stable
 
-from scistudio_package_lcms.types import ELMAVEN_ANNOTATION_COLUMNS, LCMSFeatureTable
+from scistudio_blocks_lcms.types import ELMAVEN_ANNOTATION_COLUMNS, LCMSFeatureTable
 
 
 def _sample_columns(item: LCMSFeatureTable, frame: Any) -> list[str]:

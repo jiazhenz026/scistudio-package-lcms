@@ -15,9 +15,9 @@ import pytest
 from scistudio.blocks.base import INTERACTIVE_RESPONSE_KEY, BlockConfig
 from scistudio.core.types import Collection
 
-from scistudio_package_lcms.blocks import Normalization
-from scistudio_package_lcms.blocks._normalization import apply_normalization, suggest_reference
-from scistudio_package_lcms.types import LCMSFeatureTable
+from scistudio_blocks_lcms.blocks import Normalization
+from scistudio_blocks_lcms.blocks._normalization import apply_normalization, suggest_reference
+from scistudio_blocks_lcms.types import LCMSFeatureTable
 
 _SAMPLES = ["S1", "S2"]
 

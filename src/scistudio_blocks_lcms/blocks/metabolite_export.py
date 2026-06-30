@@ -3,7 +3,7 @@
 External pathway-enrichment tools (MetaboAnalyst, Metaboverse) key on standard
 metabolite IDs, not raw compound names. This block joins a user-supplied
 ``compound → ID`` map (e.g. an ``HMDB`` lookup) onto any compound-keyed table —
-a statistics table from :class:`~scistudio_package_lcms.blocks.group_statistics.GroupStatistics`,
+a statistics table from :class:`~scistudio_blocks_lcms.blocks.group_statistics.GroupStatistics`,
 or a feature table — and returns the same table with the ID column added,
 dropping unmapped compounds by default (those tools reject rows without an ID).
 
@@ -21,8 +21,8 @@ from scistudio.blocks.process import ProcessBlock
 from scistudio.core.types import Collection, DataFrame
 from scistudio.stability import stable
 
-from scistudio_package_lcms.blocks._results import dataframe_from_pandas
-from scistudio_package_lcms.types import LCMSFeatureTable
+from scistudio_blocks_lcms.blocks._results import dataframe_from_pandas
+from scistudio_blocks_lcms.types import LCMSFeatureTable
 
 
 def _to_frame(obj: Any) -> Any:

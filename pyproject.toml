@@ -44,13 +44,13 @@ docs = [
 # Three entry points register the package with SciStudio core. Keep all three
 # even if a group is empty (return []), so discovery is uniform across packages.
 [project.entry-points."scistudio.blocks"]
-example = "scistudio_package_lcms:get_block_package"
+example = "scistudio_blocks_lcms:get_block_package"
 
 [project.entry-points."scistudio.types"]
-example = "scistudio_package_lcms:get_types"
+example = "scistudio_blocks_lcms:get_types"
 
 [project.entry-points."scistudio.previewers"]
-example = "scistudio_package_lcms.previewers:get_previewers"
+example = "scistudio_blocks_lcms.previewers:get_previewers"
 
 # OTA hot-update source (#1784). The publish-time source of truth for
 # scripts/ota_publish.py: it packs src/, hashes it, and uploads manifest.json +
@@ -64,16 +64,16 @@ channel = "alpha"
 min_core_base = "0.3.2"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/scistudio_package_lcms"]
+packages = ["src/scistudio_blocks_lcms"]
 # Ship any packaged previewer frontend assets in the wheel.
 artifacts = [
-    "src/scistudio_package_lcms/previewers/assets/*.js",
-    "src/scistudio_package_lcms/previewers/assets/*.mjs",
-    "src/scistudio_package_lcms/previewers/assets/*.css",
+    "src/scistudio_blocks_lcms/previewers/assets/*.js",
+    "src/scistudio_blocks_lcms/previewers/assets/*.mjs",
+    "src/scistudio_blocks_lcms/previewers/assets/*.css",
     # Embedded R scripts run by blocks (e.g. IsotopeCorrection).
-    "src/scistudio_package_lcms/blocks/_r/*.R",
+    "src/scistudio_blocks_lcms/blocks/_r/*.R",
     # Interactive panel ES modules served to the frontend (ADR-051).
-    "src/scistudio_package_lcms/panels/*.js",
+    "src/scistudio_blocks_lcms/panels/*.js",
 ]
 
 # Lint/format/type config mirrors SciStudio core so authors get the same
@@ -87,7 +87,7 @@ src = ["src", "tests"]
 select = ["E", "F", "I", "UP", "B", "W"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["scistudio_package_lcms"]
+known-first-party = ["scistudio_blocks_lcms"]
 
 [tool.mypy]
 python_version = "3.11"

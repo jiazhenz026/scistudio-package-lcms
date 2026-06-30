@@ -9,14 +9,14 @@ import pytest
 from scistudio.blocks.base import INTERACTIVE_RESPONSE_KEY, BlockConfig
 from scistudio.core.types import Collection
 
-from scistudio_package_lcms.blocks import GroupStatistics
-from scistudio_package_lcms.blocks._group_stats import (
+from scistudio_blocks_lcms.blocks import GroupStatistics
+from scistudio_blocks_lcms.blocks._group_stats import (
     benjamini_hochberg,
     compute_stats,
     split_group_replicate,
     suggest_groups,
 )
-from scistudio_package_lcms.types import LCMSFeatureTable
+from scistudio_blocks_lcms.types import LCMSFeatureTable
 
 _SAMPLES = ["A1", "A2", "A3", "B1", "B2", "B3"]
 

@@ -15,7 +15,7 @@ in this reference.
 
 ## Package root
 
-::: scistudio_package_lcms
+::: scistudio_blocks_lcms
     options:
       show_root_heading: true
       members:
@@ -28,12 +28,12 @@ in this reference.
 
 ## Types
 
-::: scistudio_package_lcms.types
+::: scistudio_blocks_lcms.types
     options:
       show_root_heading: true
 
 ## Helpers
 
-::: scistudio_package_lcms.helpers
+::: scistudio_blocks_lcms.helpers
     options:
       show_root_heading: true

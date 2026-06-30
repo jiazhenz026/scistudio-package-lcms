@@ -38,7 +38,7 @@ package's** version line. Transcribe this table for your own types (ADR-052
 
 | Member | Kind | Tier | Since | Notes |
 | --- | --- | --- | --- | --- |
-| `LCMSFeatureTable` | type (subclasses `DataFrame`) | stable | 0.1.0 | public at `from scistudio_package_lcms import LCMSFeatureTable` — never a deep path |
+| `LCMSFeatureTable` | type (subclasses `DataFrame`) | stable | 0.1.0 | public at `from scistudio_blocks_lcms import LCMSFeatureTable` — never a deep path |
 | `LCMSFeatureTable(columns=…, row_count=…, schema=…, data=…, meta=…)` | constructor | stable | 0.1.0 | canonical construction; inherited core `DataFrame` idiom, signature not redefined |
 | `LCMSFeatureTable.Meta` | pydantic model | stable | 0.1.0 | typed, frozen metadata: `polarity`, `software`, `labeled`, `annotation_columns`, `sample_columns` |
 | `LCMSFeatureTable.from_elmaven(frame, *, polarity=None, sample_columns=None)` | classmethod | stable | 0.1.0 | domain-native packing constructor **on the type**: packs an El-MAVEN peaks frame |

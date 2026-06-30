@@ -9,9 +9,9 @@ import pytest
 from scistudio.blocks.base import BlockConfig
 from scistudio.core.types import Collection
 
-from scistudio_package_lcms.blocks import Log2MeanCenter
-from scistudio_package_lcms.blocks.log2_mean_center import _log2_mean_center
-from scistudio_package_lcms.types import LCMSFeatureTable
+from scistudio_blocks_lcms.blocks import Log2MeanCenter
+from scistudio_blocks_lcms.blocks.log2_mean_center import _log2_mean_center
+from scistudio_blocks_lcms.types import LCMSFeatureTable
 
 _SAMPLES = ["S1", "S2"]
 

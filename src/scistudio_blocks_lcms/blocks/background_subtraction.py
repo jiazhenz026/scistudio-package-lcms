@@ -30,14 +30,14 @@ from scistudio.blocks.process import ProcessBlock
 from scistudio.core.types import Collection
 from scistudio.stability import stable
 
-from scistudio_package_lcms.blocks._background_match import apply_subtraction, suggest
-from scistudio_package_lcms.types import ELMAVEN_ANNOTATION_COLUMNS, LCMSFeatureTable
+from scistudio_blocks_lcms.blocks._background_match import apply_subtraction, suggest
+from scistudio_blocks_lcms.types import ELMAVEN_ANNOTATION_COLUMNS, LCMSFeatureTable
 
-_PANEL_ID = "scistudio_package_lcms.interactive.background_subtraction"
+_PANEL_ID = "scistudio_blocks_lcms.interactive.background_subtraction"
 #: Absolute on-disk dir the backend serves the panel asset from (ADR-051/§7).
-#: Resolves to ``src/scistudio_package_lcms/panels`` (editable) or the installed
+#: Resolves to ``src/scistudio_blocks_lcms/panels`` (editable) or the installed
 #: package's ``panels/`` dir (wheel).
-_PANEL_ASSET_ROOT = str(files("scistudio_package_lcms").joinpath("panels"))
+_PANEL_ASSET_ROOT = str(files("scistudio_blocks_lcms").joinpath("panels"))
 
 
 def _sample_columns(item: LCMSFeatureTable, frame: Any) -> list[str]:

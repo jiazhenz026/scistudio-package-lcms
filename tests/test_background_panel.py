@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from scistudio_package_lcms.blocks import BackgroundSubtraction
+from scistudio_blocks_lcms.blocks import BackgroundSubtraction
 
 
 def _panel_file() -> Path:

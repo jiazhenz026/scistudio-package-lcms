@@ -22,8 +22,8 @@ from scistudio.blocks.process import ProcessBlock
 from scistudio.core.types import Collection
 from scistudio.stability import stable
 
-from scistudio_package_lcms.blocks._mid import compute_mid_and_enrichment
-from scistudio_package_lcms.types import ELMAVEN_ANNOTATION_COLUMNS, LCMSFeatureTable
+from scistudio_blocks_lcms.blocks._mid import compute_mid_and_enrichment
+from scistudio_blocks_lcms.types import ELMAVEN_ANNOTATION_COLUMNS, LCMSFeatureTable
 
 
 def _sample_columns(item: LCMSFeatureTable, frame: Any) -> list[str]:
