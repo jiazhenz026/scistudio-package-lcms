@@ -53,6 +53,22 @@ main <- function() {
 
   df <- utils::read.csv(input, check.names = FALSE, stringsAsFactors = FALSE)
 
+  # El-MAVEN >= 0.4 can report one compound as several peak groups (same
+  # 'compound', different 'metaGroupId'). AccuCor / AccuCor2 require a unique
+  # identity per peak group ("Multiple peak groups detected ... use metaGroupId
+  # column"), so fold the peak-group id into the compound name wherever a
+  # compound spans more than one group. Isotopologues of one group share a
+  # metaGroupId so they stay together; distinct groups separate and are
+  # corrected independently (e.g. "Glucose" -> "Glucose [g1]", "Glucose [g2]").
+  if (all(c("compound", "metaGroupId") %in% names(df))) {
+    groups_per_compound <- tapply(df$metaGroupId, df$compound, function(x) length(unique(x)))
+    multi <- names(groups_per_compound)[!is.na(groups_per_compound) & groups_per_compound > 1]
+    if (length(multi) > 0) {
+      needs <- df$compound %in% multi
+      df$compound[needs] <- paste0(df$compound[needs], " [g", df$metaGroupId[needs], "]")
+    }
+  }
+
   if (identical(mode, "accucor")) {
     if (!requireNamespace("accucor", quietly = TRUE)) {
       stop("R package 'accucor' is not installed (devtools::install_github('XiaoyangSu/AccuCor'))")

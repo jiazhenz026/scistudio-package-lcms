@@ -3,7 +3,7 @@
 A :class:`~scistudio.blocks.io.simple_io.SimpleLoader`: the user points the
 block at an El-MAVEN ``*_peaks_*.csv`` (or tab-delimited) export and it reads
 the file into the package's :class:`LCMSFeatureTable` via the type's
-:meth:`~scistudio_package_lcms.types.LCMSFeatureTable.from_elmaven` constructor.
+:meth:`~scistudio_blocks_lcms.types.LCMSFeatureTable.from_elmaven` constructor.
 The framework synthesizes the load
 :class:`~scistudio.blocks.io.FormatCapability` from the class attributes.
 """
@@ -13,11 +13,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, ClassVar, Literal
 
-from scistudio.blocks.base import OutputPort
+from scistudio.blocks.base import BlockConfig, OutputPort
 from scistudio.blocks.io import SimpleLoader
+from scistudio.core.types import Collection
 from scistudio.stability import stable
 
-from scistudio_package_lcms.types import LCMSFeatureTable
+from scistudio_blocks_lcms.types import LCMSFeatureTable
 
 
 def _infer_polarity(name: str) -> Literal["positive", "negative"] | None:
@@ -49,7 +50,12 @@ class LoadPeakTable(SimpleLoader):
     format_id: ClassVar[str] = "el_maven_peaks"
 
     output_ports: ClassVar[list[OutputPort]] = [
-        OutputPort(name="data", accepted_types=[LCMSFeatureTable], description="Loaded LCMS feature table."),
+        OutputPort(
+            name="data",
+            accepted_types=[LCMSFeatureTable],
+            is_collection=True,
+            description="Loaded LCMS feature table(s) — one per selected file.",
+        ),
     ]
 
     config_schema: ClassVar[dict[str, Any]] = {
@@ -73,6 +79,28 @@ class LoadPeakTable(SimpleLoader):
         "required": ["path"],
     }
 
+    def load(self, config: BlockConfig, output_dir: str = "") -> Collection:
+        """Read one *or several* selected peaks files into a collection of tables.
+
+        The base :class:`SimpleLoader` is single-file; El-MAVEN runs routinely
+        export several files (per scan / polarity), so this override accepts a
+        ``path`` that is a single string or a list and loads each into its own
+        :class:`LCMSFeatureTable`. The result is always a :class:`Collection`
+        (the loader's output port is a collection), so a one-file load is a
+        one-item collection.
+        """
+        raw = config.get("path")
+        entries = list(raw) if isinstance(raw, (list, tuple)) else [raw]
+        params = dict(config.params)
+        tables = [
+            self.load_file(Path(entry), params)
+            for entry in entries
+            if entry is not None and not (isinstance(entry, str) and not entry.strip())
+        ]
+        if not tables:
+            raise ValueError("LoadPeakTable requires at least one file path in config.params['path'].")
+        return Collection(tables, item_type=LCMSFeatureTable)
+
     def load_file(self, path: Path, config: dict[str, Any]) -> LCMSFeatureTable:
         """Read the peaks file at *path* into an :class:`LCMSFeatureTable`."""
         import pandas as pd
@@ -88,7 +116,14 @@ class LoadPeakTable(SimpleLoader):
         else:
             polarity = _infer_polarity(path.name)
 
-        return LCMSFeatureTable.from_elmaven(frame, polarity=polarity)
+        # Record the source file on Meta (provenance) and the file stem as the
+        # display name. Core's resolver (#1812) names the table from these, and
+        # LCMSFeatureTable.from_wide(source=…) carries them to derived tables, so
+        # the whole pipeline keeps the file's identity without per-block naming.
+        table = LCMSFeatureTable.from_elmaven(frame, polarity=polarity, source_file=path.name)
+        table.user["sheet_name"] = path.stem
+        table.user["display_name"] = path.stem
+        return table
 
 
 __all__ = ["LoadPeakTable"]

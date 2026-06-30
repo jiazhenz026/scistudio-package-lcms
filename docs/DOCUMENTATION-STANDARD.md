@@ -56,3 +56,15 @@ in `get_blocks()` but is absent here (or vice-versa) is a documentation defect.
   (`test_readme_blocks.py`).
 - Document compatibility: when the `scistudio>=X` floor changes, say why in
   `CHANGELOG.md`.
+
+## 6. Wheel-bundled docs
+
+SciStudio core reads installed package docs from a package-local
+`_scistudio_docs/` directory. The wheel build generates that directory (via
+`hatch_build.py` → `scripts/build_package_docs.py`); do not edit it by hand or
+commit it (it is git-ignored). Keep these source files current instead:
+`README.md`, `docs/package-overview.md`, `docs/reference.md`,
+`docs/ui-style-guide.md`, `tests/api/public_surface.snapshot.json`. The
+generated bundle carries `manifest.json`, an `agent-reference/`, an
+`api-reference/` (index + MkDocs source + public-surface snapshot +
+package-overview), and a `user-guide/` copy of the docs.

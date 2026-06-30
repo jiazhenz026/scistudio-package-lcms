@@ -6,6 +6,74 @@ All notable changes to this package are documented here. The format follows
 
 ## [Unreleased]
 
+- Wheel-bundled docs (template parity): a Hatch build hook (`hatch_build.py` →
+  `scripts/build_package_docs.py`) generates `src/<module>/_scistudio_docs/` at
+  wheel-build time and ships it in the wheel, so SciStudio core can inject this
+  package's docs (manifest + agent / API reference + user guide) into projects.
+  The directory is git-ignored and recreated per build.
+- Multi-file IO + table naming:
+  - `LoadPeakTable` now loads **one or several** files (a `path` list) into a
+    `Collection[LCMSFeatureTable]` — one table per file — and records each file
+    on `LCMSFeatureTable.Meta.source_file` plus the file stem as the table's
+    display name.
+  - `SavePeakTable` (new) writes feature table(s) to CSV: a single table to a
+    `.csv` path, or one CSV per table (named by `display_name`, de-duplicated)
+    into a folder when given a collection. (Note: a single saver call still
+    writes one file each; multi-file means one file per collection item.)
+  - `LCMSFeatureTable.Meta` gains `source_file`, and
+    `LCMSFeatureTable.from_wide(…, source=<input table>)` carries the source's
+    provenance (`source_file`) and user-facing name to the derived table — so
+    core's display-name resolver (#1812) names the whole pipeline from the
+    origin file with no per-block stamping. Blocks that emit a *specifically
+    named* product (the corrector matrices, MID / enrichment, statistics,
+    consumption/release) compose `"<source file> · <product>"` (e.g.
+    `scan1_negative · Corrected`) so several inputs' products stay distinct.
+- `IsotopeCorrection` fix — El-MAVEN ≥ 0.4 can report one compound as several
+  peak groups (same `compound`, different `metaGroupId`), which AccuCor /
+  AccuCor2 reject ("Multiple peak groups detected … use metaGroupId column").
+  The embedded R now folds the peak-group id into the compound name where a
+  compound spans more than one group (e.g. `Glucose` → `Glucose [g1]`,
+  `Glucose [g2]`), so each group is corrected independently. Validated against
+  real AccuCor; a regression test runs when R + accucor are present.
+  Each of the four output tables is now named after its corrector matrix
+  (`display_name` / `sheet_name` = "Original" / "Corrected" / "Normalized" /
+  "Pool size") so the previewer shows the matrix's identity instead of an
+  unnamed table (#1812).
+- Distribution renamed `scistudio-package-lcms` → `scistudio-blocks-lcms` and the
+  import module `scistudio_package_lcms` → `scistudio_blocks_lcms`, so the
+  desktop Package Manager installs it (it discovers `scistudio_blocks_*` modules)
+  and the palette groups it as a plugin package rather than under SciStudio Core.
+- Downstream-analysis blocks (#10) — the reusable, general steps of the three
+  core LCMS analyses (consumption/release, untargeted, isotope tracing),
+  abstracted out of the lab-specific flux pipeline. Data type is unchanged
+  (`LCMSFeatureTable`); result tables are the core `DataFrame`; visualization is
+  left to the user's plot card and pathway enrichment to external tools:
+  - `Normalization` — interactive internal-standard normalization: divides each
+    sample column by a reference. Modes: a single reference feature (e.g.
+    HEPES), a per-metabolite isotope internal standard (located via
+    `isotopeLabel`, e.g. glucose ÷ ¹³C-glucose), or total / median. The
+    reference / internal-standard pairing is picked in a panel; reference rows
+    are dropped after use. Ships `panels/normalization.js`.
+  - `Log2MeanCenter` — a small standalone transform: `log2` + per-feature
+    mean-centering (relative log2FC), the untargeted heatmap/stats input.
+    Orthogonal to `Normalization` (across samples vs within a sample).
+  - `GroupStatistics` — interactive group assignment, then a per-feature Welch
+    t-test / one-way ANOVA / linear trend with Benjamini-Hochberg (or
+    Bonferroni) correction; emits a tidy statistics `DataFrame` (group means,
+    statistic, p-value, p_adj, significant). Ships `panels/group_statistics.js`.
+    Adds a `scipy>=1.10` dependency (BH is implemented locally).
+  - `ConsumptionRelease` — interactive reference-group pick; per feature, each
+    sample minus the reference-group mean (consumed −, released +). An optional
+    `metadata` input of per-sample cell numbers plus a Δt config turns the
+    difference into a per-cell-per-time rate. Ships
+    `panels/consumption_release.js`.
+  - `CalculateMID` — the mass isotopologue distribution (M+0/M+1/… fractions per
+    compound per sample) and the derived ¹³C enrichment (`Σ i·MID_i / (n−1)`).
+    Two ports — `mid` (isotopologue-row fractions) and `enrichment` (one row per
+    compound) — since the two have different granularity.
+  - `MetaboliteExport` — joins a user-supplied `compound→ID` map (e.g. HMDB)
+    onto a statistics or feature table for external enrichment tools
+    (MetaboAnalyst / Metaboverse), dropping unmapped compounds by default.
 - `ElMaven` — an `AppBlock` that runs El-MAVEN's headless `peakdetector` over raw
   `.mzML` / `.mzXML` files and outputs a standard `LCMSFeatureTable`. It uses the
   core `AppBlock` `prepare_launch` hook (ADR-052 §7, core 0.3.2) to generate the

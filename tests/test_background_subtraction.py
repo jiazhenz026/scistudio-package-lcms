@@ -15,8 +15,8 @@ import pandas as pd
 from scistudio.blocks.base import INTERACTIVE_RESPONSE_KEY, BlockConfig
 from scistudio.core.types import Collection
 
-from scistudio_package_lcms.blocks import BackgroundSubtraction
-from scistudio_package_lcms.blocks._background_match import (
+from scistudio_blocks_lcms.blocks import BackgroundSubtraction
+from scistudio_blocks_lcms.blocks._background_match import (
     BACKGROUND,
     IGNORE,
     QC,
@@ -25,7 +25,7 @@ from scistudio_package_lcms.blocks._background_match import (
     classify_role,
     suggest,
 )
-from scistudio_package_lcms.types import LCMSFeatureTable
+from scistudio_blocks_lcms.types import LCMSFeatureTable
 
 
 def test_classify_role_handles_messy_names() -> None:

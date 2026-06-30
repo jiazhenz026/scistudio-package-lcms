@@ -16,7 +16,7 @@ from scistudio.blocks.base import BlockConfig, InputPort, OutputPort
 from scistudio.blocks.process import ProcessBlock
 from scistudio.stability import stable
 
-from scistudio_package_lcms.types import LCMSFeatureTable
+from scistudio_blocks_lcms.types import LCMSFeatureTable
 
 
 @stable(since="0.1.0")

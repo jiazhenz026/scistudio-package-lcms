@@ -31,13 +31,24 @@ from scistudio.blocks.process import ProcessBlock
 from scistudio.core.types import Collection
 from scistudio.stability import stable
 
-from scistudio_package_lcms.types import ELMAVEN_ANNOTATION_COLUMNS, LCMSFeatureTable
+from scistudio_blocks_lcms.blocks._naming import derived_name
+from scistudio_blocks_lcms.types import ELMAVEN_ANNOTATION_COLUMNS, LCMSFeatureTable
 
 _R_SCRIPT = "isotope_correction.R"
 
 #: Output ports, in the order the correctors report their matrices. Each maps to
 #: a ``<name>.csv`` the embedded R writes into the run's output directory.
 _OUTPUTS = ("original", "corrected", "normalized", "pool")
+
+#: Human-facing sheet names per output port — stamped as the table's
+#: ``display_name`` (and ``sheet_name``) so the previewer / data router show the
+#: corrector matrix's identity (#1812) instead of an unnamed table.
+_SHEET_NAMES = {
+    "original": "Original",
+    "corrected": "Corrected",
+    "normalized": "Normalized",
+    "pool": "Pool size",
+}
 
 
 def _resolve_rscript(config: BlockConfig) -> str:
@@ -207,7 +218,7 @@ class IsotopeCorrection(ProcessBlock):
             frame.to_csv(input_csv, index=False)
 
             env = self._build_env(config, corrector, input_csv, output_dir, workdir, sample_columns)
-            with as_file(files("scistudio_package_lcms.blocks").joinpath("_r", _R_SCRIPT)) as script_path:
+            with as_file(files("scistudio_blocks_lcms.blocks").joinpath("_r", _R_SCRIPT)) as script_path:
                 proc = subprocess.run(
                     [rscript, str(script_path)],
                     env=env,
@@ -229,13 +240,23 @@ class IsotopeCorrection(ProcessBlock):
                     out_frame = pd.read_csv(path)
                 except pd.errors.EmptyDataError:
                     out_frame = pd.DataFrame()
-                tables[name] = LCMSFeatureTable.from_wide(
+                table = LCMSFeatureTable.from_wide(
                     out_frame,
                     sample_columns=sample_columns,
+                    source=item,
                     polarity=meta.polarity if meta is not None else None,
                     software=meta.software if meta is not None else None,
                     labeled=meta.labeled if meta is not None else True,
                 )
+                # Name the table after its corrector matrix so the previewer /
+                # data router show "Corrected" / "Normalized" / … (#1812), prefixed
+                # with the source file so several inputs' matrices stay distinct
+                # (e.g. "scan1_negative · Corrected"). ``sheet_name`` is the
+                # structural identity (save grouping).
+                sheet = _SHEET_NAMES[name]
+                table.user["sheet_name"] = sheet
+                table.user["display_name"] = derived_name(item, sheet)
+                tables[name] = table
         return tables
 
     @staticmethod

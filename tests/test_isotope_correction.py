@@ -17,9 +17,9 @@ import pytest
 from scistudio.blocks.base import BlockConfig
 from scistudio.core.types import Collection
 
-from scistudio_package_lcms.blocks import IsotopeCorrection
-from scistudio_package_lcms.blocks.isotope_correction import _OUTPUTS, _resolve_rscript
-from scistudio_package_lcms.types import LCMSFeatureTable
+from scistudio_blocks_lcms.blocks import IsotopeCorrection
+from scistudio_blocks_lcms.blocks.isotope_correction import _OUTPUTS, _SHEET_NAMES, _resolve_rscript
+from scistudio_blocks_lcms.types import LCMSFeatureTable
 
 
 def _persisted_table(tmp_path: Path, stem: str = "input") -> LCMSFeatureTable:
@@ -35,7 +35,8 @@ def _persisted_table(tmp_path: Path, stem: str = "input") -> LCMSFeatureTable:
             "Sample_B": [1743866.38, 163117.81],
         }
     )
-    table = LCMSFeatureTable.from_elmaven(frame, polarity="negative")
+    table = LCMSFeatureTable.from_elmaven(frame, polarity="negative", source_file=f"{stem}.csv")
+    table.user["display_name"] = stem
     table.save(tmp_path / f"{stem}.parquet")
     return table
 
@@ -82,7 +83,7 @@ def test_ports_and_config() -> None:
 
 def test_missing_rscript_raises(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
-        "scistudio_package_lcms.blocks.isotope_correction.shutil.which",
+        "scistudio_blocks_lcms.blocks.isotope_correction.shutil.which",
         lambda _name: None,
     )
     with pytest.raises(RuntimeError, match="Rscript was not found"):
@@ -106,6 +107,23 @@ def test_emits_four_output_ports(tmp_path: Path) -> None:
         assert result.meta.sample_columns == ("Sample_A", "Sample_B")
         assert result.meta.annotation_columns == ("compound",)
         assert result.meta.polarity == "negative"
+        # The table is named after its corrector matrix, prefixed with the source
+        # file so several inputs' matrices stay distinct (#1812).
+        assert result.user["display_name"] == f"input · {_SHEET_NAMES[name]}"
+        assert result.user["sheet_name"] == _SHEET_NAMES[name]
+
+
+def test_matrix_names_are_distinct_per_source_file(tmp_path: Path) -> None:
+    """Several inputs' corrector matrices keep distinct names (source file prefix)."""
+    fake = _fake_rscript(tmp_path)
+    config = BlockConfig(params={"corrector": "accucor", "rscript_path": str(fake), "resolution": 100000})
+    t1 = _persisted_table(tmp_path, stem="scan1_negative")
+    t2 = _persisted_table(tmp_path, stem="scan2_positive")
+
+    out = IsotopeCorrection().run({"features": Collection([t1, t2])}, config)
+
+    corrected_names = [tbl.user["display_name"] for tbl in out["corrected"]]
+    assert corrected_names == ["scan1_negative · Corrected", "scan2_positive · Corrected"]
 
 
 def test_collection_of_tables_wraps_per_port(tmp_path: Path) -> None:
@@ -175,3 +193,50 @@ def test_env_contract_passes_parameters(tmp_path: Path) -> None:
     assert env["ACCUCOR_LABEL"] == "CH"
     assert env["ACCUCOR_C13_PURITY"] == "1"
     assert env["ACCUCOR_SAMPLE_COLUMNS"] == "Sample_A,Sample_B"
+
+
+# --- Real-accucor regression: El-MAVEN >= 0.4 multiple peak groups (#10) --------
+# Skipped where R / accucor are unavailable (e.g. CI); runs on a host that has
+# them (the embedded R's contract is validated there).
+import shutil  # noqa: E402
+import subprocess  # noqa: E402
+
+
+def _has_real_accucor() -> bool:
+    rscript = shutil.which("Rscript")
+    if rscript is None:
+        return False
+    proc = subprocess.run(
+        [rscript, "-e", 'cat(requireNamespace("accucor", quietly=TRUE))'],
+        capture_output=True,
+        text=True,
+    )
+    return proc.returncode == 0 and "TRUE" in proc.stdout
+
+
+@pytest.mark.skipif(not _has_real_accucor(), reason="real R + accucor not installed")
+def test_accucor_disambiguates_multiple_peak_groups(tmp_path: Path) -> None:
+    # "Glucose" appears as two El-MAVEN peak groups (metaGroupId 1 & 2). AccuCor
+    # rejects duplicate compounds, so the R script folds the peak-group id into
+    # the compound name; each group is corrected independently.
+    frame = pd.DataFrame(
+        {
+            "metaGroupId": [1, 1, 2, 2, 3, 3],
+            "isotopeLabel": ["C12 PARENT", "C13-label-1", "C12 PARENT", "C13-label-1", "C12 PARENT", "C13-label-1"],
+            "compound": ["Glucose", "Glucose", "Glucose", "Glucose", "Lactate", "Lactate"],
+            "formula": ["C6H12O6", "C6H12O6", "C6H12O6", "C6H12O6", "C3H6O3", "C3H6O3"],
+            "s1": [100.0, 10.0, 80.0, 8.0, 50.0, 5.0],
+            "s2": [120.0, 12.0, 90.0, 9.0, 60.0, 6.0],
+        }
+    )
+    table = LCMSFeatureTable.from_elmaven(frame, polarity="negative", sample_columns=["s1", "s2"])
+    table.save(tmp_path / "in.parquet")
+    config = BlockConfig(params={"corrector": "accucor", "resolution": 100000, "resolution_defined_at": 200})
+
+    out = IsotopeCorrection().run({"features": Collection([table])}, config)
+    corrected = out["corrected"][0]
+    corrected.save(tmp_path / "corrected.parquet")
+    compounds = set(corrected.to_pandas()["Compound"])
+
+    assert "Glucose [g1]" in compounds and "Glucose [g2]" in compounds  # two groups split
+    assert "Lactate" in compounds  # single-group compound left untouched

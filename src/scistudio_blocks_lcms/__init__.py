@@ -2,7 +2,7 @@
 
 Copy this template ("Use this template" on GitHub), then:
 
-  1. Rename ``src/scistudio_package_lcms`` to your module name.
+  1. Rename ``src/scistudio_blocks_lcms`` to your module name.
   2. Update the distribution name and the three entry points in
      ``pyproject.toml``.
   3. Replace the example type/block/previewer with your own.
@@ -12,7 +12,7 @@ Three entry points register the package with SciStudio core (mirroring
 
 - ``scistudio.blocks``     -> :func:`get_block_package`
 - ``scistudio.types``      -> :func:`get_types`
-- ``scistudio.previewers`` -> :func:`scistudio_package_lcms.previewers.get_previewers`
+- ``scistudio.previewers`` -> :func:`scistudio_blocks_lcms.previewers.get_previewers`
 
 Every public symbol carries an ADR-052 §5 stability marker (``stable`` /
 ``provisional``) with a ``Since`` against **this package's** version line, read
@@ -27,9 +27,9 @@ from typing import Any
 from scistudio.blocks.base import PackageInfo, PackageOtaSource
 from scistudio.stability import provisional, stable
 
-from scistudio_package_lcms.blocks import BLOCKS
-from scistudio_package_lcms.previewers import get_previewers
-from scistudio_package_lcms.types import LCMSFeatureTable, get_types
+from scistudio_blocks_lcms.blocks import BLOCKS
+from scistudio_blocks_lcms.previewers import get_previewers
+from scistudio_blocks_lcms.types import LCMSFeatureTable, get_types
 
 __version__ = "0.1.0"
 
@@ -46,7 +46,7 @@ OTA_CHANNEL = "alpha"
 def get_package_info() -> PackageInfo:
     """Return package metadata for the ``scistudio.blocks`` registry."""
     return PackageInfo(
-        name="scistudio-package-lcms",
+        name="scistudio-blocks-lcms",
         description="SciStudio LCMS package.",
         author="SciStudio Contributors",
         version=__version__,
