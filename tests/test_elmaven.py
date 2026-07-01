@@ -1,16 +1,18 @@
 """Tests for the ElMaven AppBlock.
 
-El-MAVEN's peakdetector is not available in CI, so a fake stands in: it reads the
-XML config the block writes, and emits an El-MAVEN-shaped peaks CSV into the
-output directory. This exercises the real flow — input staging, the
-``prepare_launch`` config generation (one ``<samples>`` per file), the launch,
-and reconstruction of the CSV into a standard ``LCMSFeatureTable``.
+ElMaven is an interactive launcher: it hands the input sample files to El-MAVEN as
+positional command-line arguments, opens the application, and waits for the user to
+export a peaks CSV into the *Save Outputs At* directory. El-MAVEN is not available in
+CI, so a fake stands in: it receives the sample paths as positional arguments and emits
+an El-MAVEN-shaped peaks CSV into the output directory (modelling the user's manual
+export). This exercises the real flow — input handling, the ``prepare_launch`` argv
+generation, the launch, and reconstruction of the CSV into a standard
+``LCMSFeatureTable``.
 """
 
 from __future__ import annotations
 
 import stat
-import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from scistudio.blocks.base import BlockConfig
@@ -20,8 +22,8 @@ from scistudio_blocks_lcms.blocks import ElMaven
 from scistudio_blocks_lcms.types import LCMSFeatureTable
 
 
-def test_prepare_launch_injects_every_sample(tmp_path: Path) -> None:
-    """Each staged mzML/mzXML file becomes its own <samples> entry."""
+def test_prepare_launch_returns_every_sample_path(tmp_path: Path) -> None:
+    """Each staged mzML/mzXML file becomes its own positional argument."""
     exchange = tmp_path / "exchange"
     staged = exchange / "inputs" / "samples"
     staged.mkdir(parents=True)
@@ -30,29 +32,24 @@ def test_prepare_launch_injects_every_sample(tmp_path: Path) -> None:
     output_dir = exchange / "outputs"
     output_dir.mkdir()
 
-    argv = ElMaven().prepare_launch(exchange, output_dir, BlockConfig(params={"polarity": "negative", "ppm": 15}))
+    argv = ElMaven().prepare_launch(exchange, output_dir, BlockConfig(params={}))
 
-    assert argv[0] == "--xml"
-    root = ET.parse(argv[1]).getroot()
-    general = root.find("GeneralArguments")
-    sample_values = sorted(s.get("value") for s in general.findall("samples"))
-    assert len(sample_values) == 2
-    assert sample_values[0].endswith("item_0000.mzML")
-    assert sample_values[1].endswith("item_0001.mzXML")
-    assert general.find("outputdir").get("value") == str(output_dir)
-    assert root.find("OptionsDialogArguments").find("ionizationMode").get("value") == "-1"
+    assert len(argv) == 2
+    assert sorted(Path(a).name for a in argv) == ["item_0000.mzML", "item_0001.mzXML"]
 
 
-def _fake_peakdetector(tmp_path: Path) -> Path:
-    """Stand-in for peakdetector: read --xml config, write an El-MAVEN peaks CSV."""
-    script = tmp_path / "fake_peakdetector"
+def _fake_elmaven(tmp_path: Path, output_dir: Path) -> Path:
+    """Stand-in for El-MAVEN: read sample paths from argv, export a peaks CSV.
+
+    Models the user's manual export into the *Save Outputs At* directory, which is
+    baked into the script (El-MAVEN receives only the sample paths on the command line).
+    """
+    script = tmp_path / "fake_elmaven"
     script.write_text(
         "#!/usr/bin/env python3\n"
-        "import os, sys, csv, xml.etree.ElementTree as ET\n"
-        "cfg = sys.argv[sys.argv.index('--xml') + 1]\n"
-        "general = ET.parse(cfg).getroot().find('GeneralArguments')\n"
-        "outdir = general.find('outputdir').get('value')\n"
-        "samples = [s.get('value') for s in general.findall('samples')]\n"
+        "import os, sys, csv\n"
+        f"outdir = {str(output_dir)!r}\n"
+        "samples = sys.argv[1:]\n"
         "ann = ['label','metaGroupId','groupId','goodPeakCount','medMz','medRt','maxQuality',\n"
         "       'isotopeLabel','compound','compoundId','formula','expectedRtDiff','ppmDiff','parent']\n"
         "cols = ann + [os.path.basename(s) for s in samples]\n"
@@ -72,8 +69,11 @@ def test_elmaven_end_to_end_outputs_feature_table(tmp_path: Path) -> None:
     s2.write_text("raw")
     artifacts = [Artifact(file_path=s1, description="a"), Artifact(file_path=s2, description="b")]
     samples = Collection(artifacts, item_type=Artifact)
-    fake = _fake_peakdetector(tmp_path)
-    config = BlockConfig(params={"app_command": str(fake), "polarity": "negative", "ppm": 15})
+
+    output_dir = tmp_path / "saved_outputs"
+    output_dir.mkdir()
+    fake = _fake_elmaven(tmp_path, output_dir)
+    config = BlockConfig(params={"app_command": str(fake), "output_dir": str(output_dir)})
 
     outputs = ElMaven().run({"samples": samples}, config)
 
@@ -82,6 +82,6 @@ def test_elmaven_end_to_end_outputs_feature_table(tmp_path: Path) -> None:
     table = coll[0]
     assert isinstance(table, LCMSFeatureTable)
     assert table.row_count == 1
-    # Both injected samples became sample columns of the standard table.
+    # Both samples handed to El-MAVEN became sample columns of the standard table.
     assert len(table.meta.sample_columns) == 2
     assert table.meta.software == "El-MAVEN"

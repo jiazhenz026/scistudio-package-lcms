@@ -74,14 +74,16 @@ All notable changes to this package are documented here. The format follows
   - `MetaboliteExport` — joins a user-supplied `compound→ID` map (e.g. HMDB)
     onto a statistics or feature table for external enrichment tools
     (MetaboAnalyst / Metaboverse), dropping unmapped compounds by default.
-- `ElMaven` — an `AppBlock` that runs El-MAVEN's headless `peakdetector` over raw
-  `.mzML` / `.mzXML` files and outputs a standard `LCMSFeatureTable`. It uses the
-  core `AppBlock` `prepare_launch` hook (ADR-052 §7, core 0.3.2) to generate the
-  peakdetector XML config — one `<samples>` entry per input file, so the whole
-  input collection is injected — and reconstructs the resulting peaks CSV into a
-  feature table (reusing `LoadPeakTable`). Exposes the executable path
-  (`app_command`) plus the key detection parameters (polarity, ppm, intensity,
-  quality, mass/RT range, alignment). Needs `peakdetector` on the host.
+- `ElMaven` — an `AppBlock` that opens raw `.mzML` / `.mzXML` files in the El-MAVEN
+  application and collects the exported peak table as a standard `LCMSFeatureTable`.
+  It uses the core `AppBlock` `prepare_launch` hook (ADR-052 §7, core 0.3.2) to pass
+  the sample files as positional arguments — El-MAVEN's GUI auto-loads every
+  positional argument — so the app opens with the data loaded. The user tunes
+  detection and exports a peaks CSV into the configured output directory, which the
+  block reconstructs into a feature table (reusing `LoadPeakTable`). Config is just
+  the executable path (`app_command`, *Executable Path*) and the output directory
+  (`output_dir`, *Save Outputs At*); detection parameters live in El-MAVEN. Needs the
+  El-MAVEN app on the host.
 - `BackgroundSubtraction` — an interactive block (ADR-051) that opens a panel
   (one tab per input table) to assign each sample column a role and a
   background, then subtracts each sample's aggregated (mean/median) background
